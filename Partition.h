@@ -13,15 +13,19 @@ class Partition
 {
 public:
     /**
-     * TODO: docstring
-     * @param path
+     * Initialize a Partition instance bound to the given file.
+     * Tries to open the file, read boot record and does the basic check.
+     * If one of that fails, partition remains closed and need to be formatted
+     *
+     * @param path The path of the partition file.
      */
     explicit Partition(std::string path);
 
     /**
      * Create a file if it doesn't exist or overwrite the old one,
      * compute required mft size, bitmap size, data segment size
-     * and the final total disk size, write all required structs into the file.
+     * and the final total disk size. Finally it writes all required
+     * structs into the file.
      * Resulting file is of equal or smaller size than the given size.
      *
      * @param size The size of the partition.
@@ -218,6 +222,30 @@ private:
      * @return The read boot record.
      */
     boot_record ReadBootRecord();
+
+    /**
+     * Do a basic boot record values validation.
+     *
+     * @param bootRecord The boot record to be validated.
+     * @return
+     */
+    bool ValidateBootRecord(boot_record &bootRecord);
+
+    /**
+     * Compute the total count of mft items in partition of the given size.
+     *
+     * @param partitionSize The size of the partition.
+     * @return The count of mft items.
+     */
+    int32_t ComputeMftItemsCount(int32_t partitionSize);
+
+    /**
+     * Compute the total count of clusters that will fit into the given size
+     * of bitmap and data segment together.
+     * @param bitmapAndDataBlockSize The size that remains for the bitmap and the data segment.
+     * @return The count of clusters.
+     */
+    int32_t ComputeClustersCount(int32_t bitmapAndDataBlockSize);
 };
 
 

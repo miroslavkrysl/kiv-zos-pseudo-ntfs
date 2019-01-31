@@ -61,8 +61,8 @@ struct MftItem
 };
 
 
-const uint32_t MAX_SIZE = INT32_MAX;                    // the max size of the partition in bytes
-const uint32_t MIN_SIZE = sizeof(boot_record)
+const uint32_t MAX_PARTITION_SIZE = INT32_MAX;                    // the max size of the partition in bytes
+const uint32_t MIN_PARTITION_SIZE = sizeof(boot_record)
     + sizeof(mft_item) * 2 // min two mft items (roo + 1 node)
     + 1 // minimum 1 byte for bitmap
     + CLUSTER_SIZE;                                     // the min size of the partition

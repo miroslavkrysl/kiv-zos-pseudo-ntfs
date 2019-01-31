@@ -1,9 +1,10 @@
 #include <utility>
 #include <algorithm>
+#include <cmath>
+#include <cstring>
 
 #include "Partition.h"
 #include "Exceptions/PartitionExceptions.h"
-#include "ConsistencyChecker.h"
 
 Partition::Partition(std::string path)
     : m_path(std::move(path))
@@ -31,14 +32,9 @@ Partition::Partition(std::string path)
     try {
         m_bootRecord = ReadBootRecord();
 
-        if (!ConsistencyChecker::validateBootRecord(m_bootRecord)) {
+        if (!ValidateBootRecord(m_bootRecord)) {
             m_file.close();
             throw PartitionCorruptedException{"the partitions boot record contains invalid data"};
-        }
-
-        if (!ConsistencyChecker::checkPartitionSize(m_file, m_bootRecord.partition_size)) {
-            m_file.close();
-            throw PartitionCorruptedException{"the partition size stated in boot record doesn't correspond with the actual size"};
         }
     }
     catch (PartitionOutOfBoundsException &exception) {
@@ -46,6 +42,108 @@ Partition::Partition(std::string path)
         m_file.close();
         throw PartitionCorruptedException{"can't read the partitions boot record"};
     }
+}
+
+void Partition::Format(int32_t size, const std::string &signature, const std::string &description)
+{
+    // check arguments
+    if (size > MAX_PARTITION_SIZE) {
+        throw PartitionFormatException("max partition size " + std::to_string(MAX_PARTITION_SIZE) + " exceeded");
+    }
+
+    if (size < MIN_PARTITION_SIZE) {
+        throw PartitionFormatException("min partition size " + std::to_string(MIN_PARTITION_SIZE) + " not reached");
+    }
+
+    if (signature.length() >= sizeof(boot_record::signature) - 1) {
+        throw PartitionFormatException("max signature length is " + std::to_string(sizeof(boot_record::signature) - 1));
+    }
+
+    if (description.length() >= sizeof(boot_record::description) - 1) {
+        throw PartitionFormatException(
+            "max description length is " + std::to_string(sizeof(boot_record::description) - 1));
+    }
+
+    // close previously opened partition file
+    m_file.close();
+
+    // open partition file and clear its contents
+    m_file.open(m_path, std::ios::binary | std::ios::trunc | std::ios::in | std::ios::out);
+
+    // init partition info
+    int32_t mftItemCount = ComputeMftItemCount(size);
+    int32_t mftSize = mftItemCount * sizeof(mft_item);
+
+    int32_t clusterCount = ComputeClusterCount(size - mftSize);
+    int32_t dataSegmentSize = clusterCount * CLUSTER_SIZE;
+    auto bitmapSize = static_cast<int32_t>(std::ceil(clusterCount / 8.0));
+
+    // initialize boot record
+    boot_record bootRecord{};
+
+    std::strncpy(bootRecord.signature, signature.c_str(), sizeof(bootRecord.signature));
+    bootRecord.signature[sizeof(bootRecord.signature) - 1] = '\0';
+
+    std::strncpy(bootRecord.description, description.c_str(), sizeof(bootRecord.description));
+    bootRecord.description[sizeof(bootRecord.description) - 1] = '\0';
+
+    bootRecord.partition_size = sizeof(bootRecord) + mftSize + bitmapSize + dataSegmentSize;
+    bootRecord.cluster_size = CLUSTER_SIZE;
+    bootRecord.cluster_count = clusterCount;
+    bootRecord.mft_start_address = sizeof(boot_record);
+    bootRecord.bitmap_start_address = sizeof(boot_record) + mftSize;
+    bootRecord.data_start_address = sizeof(boot_record) + mftSize + bitmapSize;
+    bootRecord.mft_max_fragment_count = MFT_FRAGMENTS_COUNT;
+
+    // write boot record
+    m_file.write(reinterpret_cast<const char *>(&bootRecord), sizeof(boot_record));
+
+    // write mft
+    for (int i = 0; i < mftItemCount; ++i) {
+        mft_item mftItem{};
+        mftItem.uid = UID_ITEM_FREE;
+
+        m_file.write(reinterpret_cast<const char *>(&mftItem), sizeof(mft_item));
+    }
+
+    // write bitmap
+    for (int j = 0; j < bitmapSize; ++j) {
+        uint8_t byte{0};
+        m_file.write(reinterpret_cast<const char *>(&byte), sizeof(byte));
+    }
+
+    // write clusters
+    for (int k = 0; k < clusterCount; ++k) {
+        uint8_t cluster[CLUSTER_SIZE];
+        m_file.write(reinterpret_cast<const char *>(&cluster), CLUSTER_SIZE);
+    }
+
+    m_file.flush();
+
+    // create root directory
+    int32_t uid = UID_ROOT;
+
+    MftItem rootMftItem;
+    rootMftItem.index = 0;
+
+    rootMftItem.item.uid = uid;
+    rootMftItem.item.is_directory = true;
+    rootMftItem.item.item_size = sizeof(int32_t);
+    std::strncpy(rootMftItem.item.name, "root", sizeof(mft_item::name) - 1);
+    rootMftItem.item.name[sizeof(mft_item::name) - 1] = '\0';
+
+    rootMftItem.item.fragments[0].start_address = 0;
+    rootMftItem.item.fragments[0].count = 1;
+
+    mft_fragment unusedFragment{FRAGMENT_UNUSED_START_ADDRESS, 0};
+    for (int i = 1; i < MFT_FRAGMENTS_COUNT; i++) {
+        rootMftItem.item.fragments[i] = unusedFragment;
+    }
+
+    // write root directory
+    WriteMftItem(rootMftItem);
+    WriteBitmapBit(0, true);
+    WriteCluster(0, &uid, sizeof(int32_t));
 }
 
 // done
@@ -360,4 +458,52 @@ boot_record Partition::ReadBootRecord()
     boot_record bootRecord;
     Read(0, &bootRecord, sizeof(bootRecord));
     return bootRecord;
+}
+
+// done
+bool Partition::ValidateBootRecord(boot_record &bootRecord)
+{
+    if (bootRecord.signature[sizeof(bootRecord.signature) - 1] != '\0') {
+        return false;
+    }
+    if (bootRecord.description[sizeof(bootRecord.description) - 1] != '\0') {
+        return false;
+    }
+    if (bootRecord.partition_size < MIN_PARTITION_SIZE) {
+        return false;
+    }
+    if (bootRecord.cluster_size <= 0 || bootRecord.cluster_size % sizeof(int32_t) != 0) {
+        return false;
+    }
+    if (bootRecord.cluster_count < 1) {
+        return false;
+    }
+    if (bootRecord.mft_start_address <= 0) {
+        return false;
+    }
+    if (bootRecord.bitmap_start_address <= 0) {
+        return false;
+    }
+    if (bootRecord.data_start_address <= 0) {
+        return false;
+    }
+    if (bootRecord.mft_max_fragment_count <= 0) {
+        return false;
+    };
+
+    return true;
+}
+
+// done
+int32_t Partition::ComputeMftItemsCount(int32_t partitionSize)
+{
+    return static_cast<int32_t>(MFT_SIZE_RELATIVE_TO_PARTITION_SIZE * partitionSize) / sizeof(mft_item);
+}
+
+// done
+int32_t Partition::ComputeClustersCount(int32_t bitmapAndDataBlockSize)
+{
+    int32_t clusterCount = (8 * bitmapAndDataBlockSize) / (1 + 8 * CLUSTER_SIZE);
+
+    return static_cast<int32_t>(clusterCount);
 }
