@@ -47,7 +47,7 @@ struct mft_item
     int8_t order;                                       // the order of mft within the node
     int8_t count;                                       // the total count of mft items within the node
     char name[NODE_NAME_SIZE];                          // the name of the file 8 + 3 + `/0`
-    int32_t item_size;                                  // the size of the node in bytes
+    int32_t size;                                  // the size of the node in bytes
     struct mft_fragment fragments[MFT_FRAGMENTS_COUNT]; // the fragments of the node
 };
 

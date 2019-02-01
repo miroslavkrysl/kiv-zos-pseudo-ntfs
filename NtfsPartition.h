@@ -7,9 +7,9 @@
 #include "NtfsStructs.h"
 
 /**
- * The class Partition is a wrapper for the ntfs partition file.
+ * The class NtfsPartition is a wrapper for the ntfs partition file.
  */
-class Partition
+class NtfsPartition
 {
 public:
     /**
@@ -19,7 +19,7 @@ public:
      *
      * @param path The path of the partition file.
      */
-    explicit Partition(std::string path);
+    explicit NtfsPartition(std::string path);
 
     /**
      * Create a file if it doesn't exist or overwrite the old one,
@@ -124,6 +124,12 @@ public:
     bool IsOpened();
 
     /**
+     * Get the partition boot record.
+     * @return The partition boot record.
+     */
+    boot_record GetBootRecord();
+
+    /**
      * Get the partition signature (creators login name).
      * @return The partition signature.
      */
@@ -218,12 +224,6 @@ private:
     void Write(int32_t position, void *source, size_t size);
 
     /**
-     * Read the partition boot record;
-     * @return The read boot record.
-     */
-    boot_record ReadBootRecord();
-
-    /**
      * Do a basic boot record values validation.
      *
      * @param bootRecord The boot record to be validated.
@@ -237,7 +237,7 @@ private:
      * @param partitionSize The size of the partition.
      * @return The count of mft items.
      */
-    int32_t ComputeMftItemsCount(int32_t partitionSize);
+    int32_t ComputeMftItemCount(int32_t partitionSize);
 
     /**
      * Compute the total count of clusters that will fit into the given size
@@ -245,7 +245,7 @@ private:
      * @param bitmapAndDataBlockSize The size that remains for the bitmap and the data segment.
      * @return The count of clusters.
      */
-    int32_t ComputeClustersCount(int32_t bitmapAndDataBlockSize);
+    int32_t ComputeClusterCount(int32_t bitmapAndDataBlockSize);
 };
 
 
