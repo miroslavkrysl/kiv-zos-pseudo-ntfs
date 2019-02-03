@@ -4,10 +4,10 @@
 #include <cstring>
 #include <iostream>
 
-#include "NtfsPartition.h"
+#include "Partition.h"
 #include "Exceptions/PartitionExceptions.h"
 
-NtfsPartition::NtfsPartition(std::string path)
+Partition::Partition(std::string path)
     : m_path(std::move(path))
 {
     // try to open file for reading
@@ -45,7 +45,7 @@ NtfsPartition::NtfsPartition(std::string path)
     }
 }
 
-void NtfsPartition::Format(int32_t size, const std::string &signature, const std::string &description)
+void Partition::Format(int32_t size, const std::string &signature, const std::string &description)
 {
     // check arguments
     if (size > MAX_PARTITION_SIZE) {
@@ -135,10 +135,10 @@ void NtfsPartition::Format(int32_t size, const std::string &signature, const std
     std::strncpy(rootMftItem.item.name, "root", sizeof(mft_item::name) - 1);
     rootMftItem.item.name[sizeof(mft_item::name) - 1] = '\0';
 
-    rootMftItem.item.fragments[0].start_address = 0;
+    rootMftItem.item.fragments[0].start = 0;
     rootMftItem.item.fragments[0].count = 1;
 
-    mft_fragment unusedFragment{FRAGMENT_UNUSED_START_ADDRESS, 0};
+    mft_fragment unusedFragment{FRAGMENT_UNUSED_START, 0};
     for (int i = 1; i < MFT_FRAGMENTS_COUNT; i++) {
         rootMftItem.item.fragments[i] = unusedFragment;
     }
@@ -150,7 +150,7 @@ void NtfsPartition::Format(int32_t size, const std::string &signature, const std
 }
 
 // done
-MftItem NtfsPartition::ReadMftItem(int32_t index)
+MftItem Partition::ReadMftItem(int32_t index)
 {
     if (index < 0 || index >= GetMftItemCount()) {
         throw PartitionMftOutOfBoundsException{"mft item index " + std::to_string(index) + " is out of bounds"};
@@ -166,7 +166,7 @@ MftItem NtfsPartition::ReadMftItem(int32_t index)
 }
 
 // done
-std::vector<MftItem> NtfsPartition::ReadMftItems(int32_t uid)
+std::vector<MftItem> Partition::ReadMftItems(int32_t uid)
 {
     std::vector<MftItem> items;
 
@@ -186,7 +186,7 @@ std::vector<MftItem> NtfsPartition::ReadMftItems(int32_t uid)
 }
 
 // done
-void NtfsPartition::WriteMftItem(MftItem &item)
+void Partition::WriteMftItem(MftItem &item)
 {
     if (item.index < 0 || item.index >= GetMftItemCount()) {
         throw PartitionMftOutOfBoundsException{"mft item index " + std::to_string(item.index) + " is out of bounds"};
@@ -198,7 +198,7 @@ void NtfsPartition::WriteMftItem(MftItem &item)
 }
 
 // done
-void NtfsPartition::WriteMftItems(std::vector<MftItem> &items)
+void Partition::WriteMftItems(std::vector<MftItem> &items)
 {
     for (auto &item : items) {
         WriteMftItem(item);
@@ -206,7 +206,7 @@ void NtfsPartition::WriteMftItems(std::vector<MftItem> &items)
 }
 
 // done
-bool NtfsPartition::ReadBitmapBit(int32_t index)
+bool Partition::ReadBitmapBit(int32_t index)
 {
     if (index < 0 || index >= GetClusterCount()) {
         throw PartitionBitmapOutOfBoundsException{"bitmap bit index " + std::to_string(index) + " is out of bounds"};
@@ -222,7 +222,7 @@ bool NtfsPartition::ReadBitmapBit(int32_t index)
 }
 
 // done
-void NtfsPartition::WriteBitmapBit(int32_t index, bool bit)
+void Partition::WriteBitmapBit(int32_t index, bool bit)
 {
     if (index < 0 || index >= GetClusterCount()) {
         throw PartitionBitmapOutOfBoundsException{"bitmap bit index " + std::to_string(index) + " is out of bounds"};
@@ -244,7 +244,7 @@ void NtfsPartition::WriteBitmapBit(int32_t index, bool bit)
 }
 
 // done
-void NtfsPartition::ReadCluster(int32_t index, void *destination, size_t dataSize)
+void Partition::ReadCluster(int32_t index, void *destination, size_t dataSize)
 {
     if (index < 0 || index >= GetClusterCount()) {
         throw PartitionDataOutOfBoundsException{"cluster index " + std::to_string(index) + " is out of bounds"};
@@ -260,7 +260,7 @@ void NtfsPartition::ReadCluster(int32_t index, void *destination, size_t dataSiz
 }
 
 // done
-void NtfsPartition::ReadClusters(std::vector<int32_t> indexes, void *destination, size_t dataSize)
+void Partition::ReadClusters(std::vector<int32_t> indexes, void *destination, size_t dataSize)
 {
     if (dataSize > GetClusterSize() * indexes.size()) {
         throw PartitionClusterOverflowException{"trying to read more data than is the clusters total size"};
@@ -282,7 +282,7 @@ void NtfsPartition::ReadClusters(std::vector<int32_t> indexes, void *destination
 }
 
 // done
-void NtfsPartition::WriteCluster(int32_t index, void *source, size_t dataSize)
+void Partition::WriteCluster(int32_t index, void *source, size_t dataSize)
 {
     if (index < 0 || index >= GetClusterCount()) {
         throw PartitionDataOutOfBoundsException{"cluster index " + std::to_string(index) + " is out of bounds"};
@@ -298,7 +298,7 @@ void NtfsPartition::WriteCluster(int32_t index, void *source, size_t dataSize)
 }
 
 // done
-void NtfsPartition::WriteClusters(std::vector<int32_t> indexes, void *source, size_t dataSize)
+void Partition::WriteClusters(std::vector<int32_t> indexes, void *source, size_t dataSize)
 {
     if (dataSize > GetClusterSize() * indexes.size()) {
         throw PartitionClusterOverflowException{"trying to write more data than fits into the clusters"};
@@ -320,13 +320,13 @@ void NtfsPartition::WriteClusters(std::vector<int32_t> indexes, void *source, si
 }
 
 // done
-bool NtfsPartition::IsOpened()
+bool Partition::IsOpened()
 {
     return m_file.is_open();
 }
 
 // done
-boot_record NtfsPartition::GetBootRecord()
+boot_record Partition::GetBootRecord()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -336,7 +336,7 @@ boot_record NtfsPartition::GetBootRecord()
 }
 
 // done
-std::string NtfsPartition::GetSignature()
+std::string Partition::GetSignature()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -346,7 +346,7 @@ std::string NtfsPartition::GetSignature()
 }
 
 // done
-std::string NtfsPartition::GetDescription()
+std::string Partition::GetDescription()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -356,7 +356,7 @@ std::string NtfsPartition::GetDescription()
 }
 
 // done
-int32_t NtfsPartition::GetMftStartAddress()
+int32_t Partition::GetMftStartAddress()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -366,7 +366,7 @@ int32_t NtfsPartition::GetMftStartAddress()
 }
 
 // done
-int32_t NtfsPartition::GetBitmapStartAddress()
+int32_t Partition::GetBitmapStartAddress()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -376,7 +376,7 @@ int32_t NtfsPartition::GetBitmapStartAddress()
 }
 
 // done
-int32_t NtfsPartition::GetDataStartAddress()
+int32_t Partition::GetDataStartAddress()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -386,7 +386,7 @@ int32_t NtfsPartition::GetDataStartAddress()
 }
 
 // done
-int32_t NtfsPartition::GetMftItemCount()
+int32_t Partition::GetMftItemCount()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -396,7 +396,7 @@ int32_t NtfsPartition::GetMftItemCount()
 }
 
 // done
-int32_t NtfsPartition::GetMftMaxFragmentsCount()
+int32_t Partition::GetMftMaxFragmentsCount()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -406,7 +406,7 @@ int32_t NtfsPartition::GetMftMaxFragmentsCount()
 }
 
 // done
-int32_t NtfsPartition::GetClusterCount()
+int32_t Partition::GetClusterCount()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -416,7 +416,7 @@ int32_t NtfsPartition::GetClusterCount()
 }
 
 // done
-int32_t NtfsPartition::GetClusterSize()
+int32_t Partition::GetClusterSize()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -426,7 +426,7 @@ int32_t NtfsPartition::GetClusterSize()
 }
 
 // done
-int32_t NtfsPartition::GetPartitionSize()
+int32_t Partition::GetPartitionSize()
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -436,7 +436,7 @@ int32_t NtfsPartition::GetPartitionSize()
 }
 
 // done
-void NtfsPartition::Read(int32_t position, void *destination, size_t size)
+void Partition::Read(int32_t position, void *destination, size_t size)
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -451,7 +451,7 @@ void NtfsPartition::Read(int32_t position, void *destination, size_t size)
 }
 
 // done
-void NtfsPartition::Write(int32_t position, void *source, size_t size)
+void Partition::Write(int32_t position, void *source, size_t size)
 {
     if (!IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened, probably not formatted"};
@@ -466,7 +466,7 @@ void NtfsPartition::Write(int32_t position, void *source, size_t size)
 }
 
 // done
-bool NtfsPartition::ValidateBootRecord(boot_record &bootRecord)
+bool Partition::ValidateBootRecord(boot_record &bootRecord)
 {
     if (bootRecord.signature[sizeof(bootRecord.signature) - 1] != '\0') {
         std::cout << "bootRecord.signatur" << bootRecord.signature << std::endl;
@@ -509,13 +509,13 @@ bool NtfsPartition::ValidateBootRecord(boot_record &bootRecord)
 }
 
 // done
-int32_t NtfsPartition::ComputeMftItemCount(int32_t partitionSize)
+int32_t Partition::ComputeMftItemCount(int32_t partitionSize)
 {
     return static_cast<int32_t>(MFT_SIZE_RELATIVE_TO_PARTITION_SIZE * partitionSize) / sizeof(mft_item);
 }
 
 // done
-int32_t NtfsPartition::ComputeClusterCount(int32_t bitmapAndDataBlockSize)
+int32_t Partition::ComputeClusterCount(int32_t bitmapAndDataBlockSize)
 {
     int32_t clusterCount = (8 * bitmapAndDataBlockSize) / (1 + 8 * CLUSTER_SIZE);
 

@@ -7,9 +7,9 @@
 #include "NtfsStructs.h"
 
 /**
- * The class NtfsPartition is a wrapper for the ntfs partition file.
+ * The class Partition is a wrapper for the ntfs partition file.
  */
-class NtfsPartition
+class Partition
 {
 public:
     /**
@@ -19,7 +19,7 @@ public:
      *
      * @param path The path of the partition file.
      */
-    explicit NtfsPartition(std::string path);
+    explicit Partition(std::string path);
 
     /**
      * Create a file if it doesn't exist or overwrite the old one,
