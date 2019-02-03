@@ -47,7 +47,8 @@ void NodeManager::ReleaseNode(const Node &node)
     }
 
     for (auto &mftItem : node.GetMftItems()) {
-        MftItem item = mftItem;
+        MftItem item{};
+        item.index = mftItem.index;
         item.item.uid = UID_ITEM_FREE;
 
         m_partition.WriteMftItem(item);
@@ -88,25 +89,28 @@ Node NodeManager::findNode(int32_t uid)
     return Node{std::move(mftItems)};
 }
 
-
-void NodeManager::WriteToNode(const Node &node, void *source, size_t size)
+// done
+void NodeManager::WriteIntoNode(const Node &node, void *source)
 {
-
+    m_partition.WriteClusters(node.GetClusters(), source, static_cast<size_t>(node.GetSize()));
 }
 
-void NodeManager::WriteToNode(const Node &node, std::istream &source, size_t size)
+// done
+void NodeManager::WriteIntoNode(const Node &node, std::istream &source)
 {
-
+    m_partition.WriteClusters(node.GetClusters(), source, static_cast<size_t>(node.GetSize()));
 }
 
-void NodeManager::ReadFromNode(const Node &node, void *destination, size_t size)
+// done
+void NodeManager::ReadFromNode(const Node &node, void *destination)
 {
-
+    m_partition.ReadClusters(node.GetClusters(), destination, static_cast<size_t>(node.GetSize()));
 }
 
-void NodeManager::ReadFromNode(const Node &node, std::ostream &destination, size_t size)
+// done
+void NodeManager::ReadFromNode(const Node &node, std::ostream &destination)
 {
-
+    m_partition.ReadClusters(node.GetClusters(), destination, static_cast<size_t>(node.GetSize()));
 }
 
 // done

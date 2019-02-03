@@ -77,12 +77,41 @@ public:
      */
     Node findNode(int32_t uid);
 
+    /**
+     * Write data from the given source into the partition clusters owned by the given node.
+     * The size of the data is determined by the node size.
+     *
+     * @param node The node which contents will be written into.
+     * @param source The pointer to the data source.
+     */
+    void WriteIntoNode(const Node &node, void *source);
 
-    void WriteToNode(const Node &node, void *source, size_t size);
-    void WriteToNode(const Node &node, std::istream &source, size_t size);
+    /**
+     * Write data from the given input stream into the partition clusters owned by the given node.
+     * The size of the data is determined by the node size.
+     *
+     * @param node The node which contents will be written into.
+     * @param source The input stream.
+     */
+    void WriteIntoNode(const Node &node, std::istream &source);
 
-    void ReadFromNode(const Node &node, void *destination, size_t size);
-    void ReadFromNode(const Node &node, std::ostream &destination, size_t size);
+    /**
+     * Read data from the partition clusters owned by the given node into the given destination.
+     * The size of the data is determined by the node size.
+     *
+     * @param node The node which contents will be read.
+     * @param destination The pointer to the data destination.
+     */
+    void ReadFromNode(const Node &node, void *destination);
+
+    /**
+     * Read data from the partition clusters owned by the given node into the given output stream.
+     * The size of the data is determined by the node size.
+     *
+     * @param node The node which contents will be read.
+     * @param destination The output stream.
+     */
+    void ReadFromNode(const Node &node, std::ostream &destination);
 
 private:
     /**

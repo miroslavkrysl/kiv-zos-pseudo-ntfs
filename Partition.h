@@ -116,6 +116,18 @@ public:
     void ReadClusters(const std::vector<int32_t> &indexes, void *destination, size_t dataSize);
 
     /**
+     * Read the data from the clusters into the output stream.
+     * It calls the ReadCluster function in the loop.
+     *
+     * @param indexes The vector of the cluster indexes.
+     * @param destination The output stream.
+     * @param dataSize The size of the data in bytes.
+     *
+     * @throws PartitionClusterOverflowException When the dataSize is bigger than the clusters capacity.
+     */
+    void ReadClusters(const std::vector<int32_t> &indexes, std::ostream &destination, size_t dataSize);
+
+    /**
      * Write the data into the cluster from the source address.
      *
      * @param index The index of the cluster.
@@ -138,6 +150,18 @@ public:
      * @throws PartitionClusterOverflowException When the dataSize is bigger than the clusters capacity.
      */
     void WriteClusters(const std::vector<int32_t> &indexes, const void *source, size_t dataSize);
+
+    /**
+     * Write the data from the input stream into the clusters.
+     * It calls the WriteCluster function in the loop.
+     *
+     * @param indexes The vector of the cluster indexes.
+     * @param source The input stream.
+     * @param dataSize The size of the data in bytes.
+     *
+     * @throws PartitionClusterOverflowException When the dataSize is bigger than the clusters capacity.
+     */
+    void WriteClusters(const std::vector<int32_t> &indexes, std::istream &source, size_t dataSize);
 
     /**
      * Check whether the partition file is opened.

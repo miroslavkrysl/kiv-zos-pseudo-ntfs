@@ -7,7 +7,7 @@ NtfsChecker::NtfsChecker(Ntfs &ntfs)
 
 void NtfsChecker::PrintBootRecord(std::ostream &output)
 {
-    NtfsPartition &partition = ntfs.GetPartition();
+    Partition &partition = ntfs.GetPartition();
 
     output << Text::hline(61) << std::endl;
     output << "           Signature: " << partition.GetSignature() << std::endl;
@@ -25,7 +25,7 @@ void NtfsChecker::PrintBootRecord(std::ostream &output)
 
 void NtfsChecker::PrintMft(std::ostream &output)
 {
-    NtfsPartition &partition = ntfs.GetPartition();
+    Partition &partition = ntfs.GetPartition();
 
     output << Text::hline(61) << std::endl;
 
@@ -59,7 +59,7 @@ void NtfsChecker::PrintMft(std::ostream &output)
 
 void NtfsChecker::PrintBitmap(std::ostream &output)
 {
-    NtfsPartition &partition = ntfs.GetPartition();
+    Partition &partition = ntfs.GetPartition();
 
     output << Text::hline(61) << std::endl;
 

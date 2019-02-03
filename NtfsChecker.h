@@ -15,10 +15,26 @@ class NtfsChecker
 public:
     explicit NtfsChecker(Ntfs &ntfs);
 
+    /**
+     * Print the boot record to the given output stream.
+     * @param output The output stream.
+     */
     void PrintBootRecord(std::ostream &output);
+
+    /**
+     * Print the mft to the given output stream.
+     * @param output The output stream.
+     */
     void PrintMft(std::ostream &output);
+
+    /**
+     * Print the bitmap to the given output stream.
+     * @param output The output stream.
+     */
     void PrintBitmap(std::ostream &output);
+
 private:
+
     Ntfs &ntfs;
 };
 

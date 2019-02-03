@@ -281,6 +281,32 @@ void Partition::ReadClusters(const std::vector<int32_t> &indexes, void *destinat
 }
 
 // done
+void Partition::ReadClusters(const std::vector<int32_t> &indexes, std::ostream &destination, size_t dataSize)
+{
+    if (dataSize > GetClusterSize() * indexes.size()) {
+        throw PartitionClusterOverflowException{"trying to read more data than is the clusters total size"};
+    }
+
+    int32_t clusterSize = GetClusterSize();
+
+    std::vector<char> data;
+    data.resize(static_cast<unsigned long>(clusterSize));
+
+    for (auto &index : indexes) {
+        if (dataSize <= 0) {
+            break;
+        }
+
+        size_t toRead = dataSize > clusterSize ? clusterSize : dataSize;
+
+        ReadCluster(index, data.data(), toRead);
+        destination.write(data.data(), toRead);
+
+        dataSize -= clusterSize;
+    }
+}
+
+// done
 void Partition::WriteCluster(int32_t index, const void *source, size_t dataSize)
 {
     if (index < 0 || index >= GetClusterCount()) {
@@ -315,6 +341,32 @@ void Partition::WriteClusters(const std::vector<int32_t> &indexes, const void *s
 
         dataSize -= clusterSize;
         src += clusterSize;
+    }
+}
+
+// done
+void Partition::WriteClusters(const std::vector<int32_t> &indexes, std::istream &source, size_t dataSize)
+{
+    if (dataSize > GetClusterSize() * indexes.size()) {
+        throw PartitionClusterOverflowException{"trying to read more data than is the clusters total size"};
+    }
+
+    int32_t clusterSize = GetClusterSize();
+
+    std::vector<char> data;
+    data.resize(static_cast<unsigned long>(clusterSize));
+
+    for (auto &index : indexes) {
+        if (dataSize <= 0) {
+            break;
+        }
+
+        size_t toWrite = dataSize > clusterSize ? clusterSize : dataSize;
+
+        source.read(data.data(), toWrite);
+        WriteCluster(index, data.data(), toWrite);
+
+        dataSize -= clusterSize;
     }
 }
 
