@@ -4,42 +4,42 @@
 #include "Exceptions/NodeExceptions.h"
 
 // done
-int32_t Node::GetUid()
+int32_t Node::GetUid() const
 {
     return m_mftItems.front().item.uid;
 }
 
 // done
-std::string Node::GetName()
+std::string Node::GetName() const
 {
     return m_mftItems.front().item.name;
 }
 
 // done
-bool Node::IsDirectory()
+bool Node::IsDirectory() const
 {
     return m_mftItems.front().item.is_directory;
 }
 
 // done
-int32_t Node::GetSize()
+int32_t Node::GetSize() const
 {
     return m_mftItems.front().item.size;
 }
 
 // done
-const std::vector<MftItem> &Node::GetMftItems()
+const std::vector<MftItem> &Node::GetMftItems() const
 {
     return m_mftItems;
 }
 
 // done
-std::vector<mft_fragment> Node::GetFragments()
+std::vector<mft_fragment> Node::GetFragments() const
 {
     std::vector<mft_fragment> fragments;
 
     for (auto &mftItem : m_mftItems) {
-        mft_item &item = mftItem.item;
+        const mft_item &item = mftItem.item;
 
         // loop over fragments and add them to the vector
         for (int i = 0; i < MFT_FRAGMENTS_COUNT; i++) {
@@ -57,7 +57,7 @@ std::vector<mft_fragment> Node::GetFragments()
 }
 
 // done
-std::vector<int32_t> Node::GetClusters()
+std::vector<int32_t> Node::GetClusters() const
 {
     std::vector<int32_t> clusters;
     auto fragments = GetFragments();
@@ -80,7 +80,7 @@ std::vector<int32_t> Node::GetClusters()
 Node::Node(std::vector<MftItem> mftItems)
     : m_mftItems(std::move(mftItems))
 {
-    if (mftItems.empty()) {
+    if (m_mftItems.empty()) {
         throw NodeException{"no mft items given for the node creation"};
     }
 }

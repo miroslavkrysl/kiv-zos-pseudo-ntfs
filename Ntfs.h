@@ -1,16 +1,16 @@
 #pragma once
 
 
-#include "NtfsPartition.h"
+#include "Partition.h"
 
 class Ntfs
 {
 public:
     explicit Ntfs(std::string partitionPath);
 
-    NtfsPartition &GetPartition();
+    Partition &GetPartition();
 private:
-    NtfsPartition m_partition;
+    Partition m_partition;
 };
 
 

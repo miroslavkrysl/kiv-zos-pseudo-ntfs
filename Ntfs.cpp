@@ -6,7 +6,7 @@ Ntfs::Ntfs(std::string partitionPath)
     : m_partition{std::move(partitionPath)}
 {}
 
-NtfsPartition &Ntfs::GetPartition()
+Partition &Ntfs::GetPartition()
 {
     return m_partition;
 }

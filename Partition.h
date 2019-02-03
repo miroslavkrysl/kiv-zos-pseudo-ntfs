@@ -33,7 +33,7 @@ public:
      * @param description The description of the partition.
      * @throws PartitionFileNotOpenedException If it fails to open the partition file.
      */
-    void Format(int32_t size, const std::string &signature, const std::string &description);
+    void Format(int32_t size, const std::string signature, const std::string description);
 
     /**
      * Read the mft item on the given index from the partition.
@@ -60,7 +60,7 @@ public:
      *
      * @throws PartitionMftOutOfBoundsException When the mft item index is out of bounds.
      */
-    void WriteMftItem(MftItem &item);
+    void WriteMftItem(const MftItem &item);
 
     /**
      * Write the given mft items into their position on the partition.
@@ -68,7 +68,7 @@ public:
      *
      * @param items The vector of MftItems to be written.
      */
-    void WriteMftItems(std::vector<MftItem> &items);
+    void WriteMftItems(const std::vector<MftItem> &items);
 
     /**
      * Read the value of the bitmap bit on the given index.
@@ -104,18 +104,6 @@ public:
     void ReadCluster(int32_t index, void *destination, size_t dataSize);
 
     /**
-     * Write the data into the cluster from the source address.
-     *
-     * @param index The index of the cluster.
-     * @param source The pointer to the data source.
-     * @param dataSize The size of the data in bytes.
-     *
-     * @throws PartitionDataOutOfBoundsException When the cluster index is out of bounds.
-     * @throws PartitionClusterOverflowException When the dataSize is bigger than the cluster capacity.
-     */
-    void WriteCluster(int32_t index, void *source, size_t dataSize);
-
-    /**
      * Read the data from the clusters into the destination address.
      * It calls the ReadCluster function in the loop.
      *
@@ -125,7 +113,19 @@ public:
      *
      * @throws PartitionClusterOverflowException When the dataSize is bigger than the clusters capacity.
      */
-    void ReadClusters(std::vector<int32_t> indexes, void *destination, size_t dataSize);
+    void ReadClusters(const std::vector<int32_t> &indexes, void *destination, size_t dataSize);
+
+    /**
+     * Write the data into the cluster from the source address.
+     *
+     * @param index The index of the cluster.
+     * @param source The pointer to the data source.
+     * @param dataSize The size of the data in bytes.
+     *
+     * @throws PartitionDataOutOfBoundsException When the cluster index is out of bounds.
+     * @throws PartitionClusterOverflowException When the dataSize is bigger than the cluster capacity.
+     */
+    void WriteCluster(int32_t index, const void *source, size_t dataSize);
 
     /**
      * Write the data from the source address into the clusters.
@@ -137,14 +137,14 @@ public:
      *
      * @throws PartitionClusterOverflowException When the dataSize is bigger than the clusters capacity.
      */
-    void WriteClusters(std::vector<int32_t> indexes, void *source, size_t dataSize);
+    void WriteClusters(const std::vector<int32_t> &indexes, const void *source, size_t dataSize);
 
     /**
      * Check whether the partition file is opened.
      *
      * @return True if so, false otherwise.
      */
-    bool IsOpened();
+    bool IsOpened() const;
 
     /**
      * Get the partition boot record.
@@ -152,7 +152,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition boot record.
      */
-    boot_record GetBootRecord();
+    boot_record GetBootRecord() const;
 
     /**
      * Get the partition signature (creators login name).
@@ -160,7 +160,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition signature.
      */
-    std::string GetSignature();
+    std::string GetSignature() const;
 
     /**
      * Get the partition description
@@ -168,7 +168,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition description.
      */
-    std::string GetDescription();
+    std::string GetDescription() const;
 
     /**
      * Get the partition mft start address.
@@ -176,7 +176,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition mft start address.
      */
-    int32_t GetMftStartAddress();
+    int32_t GetMftStartAddress() const;
 
     /**
      * Get the partition bitmap start address.
@@ -184,7 +184,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition bitmap start address.
      */
-    int32_t GetBitmapStartAddress();
+    int32_t GetBitmapStartAddress() const;
 
     /**
      * Get the partition data start address.
@@ -192,7 +192,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition data start address.
      */
-    int32_t GetDataStartAddress();
+    int32_t GetDataStartAddress() const;
 
     /**
      * Get the partition mft item count.
@@ -200,7 +200,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition mft item count.
      */
-    int32_t GetMftItemCount();
+    int32_t GetMftItemCount() const;
 
     /**
      * Get the partition mft max fragments count.
@@ -208,7 +208,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition mft max fragments count.
      */
-    int32_t GetMftMaxFragmentsCount();
+    int32_t GetMftMaxFragmentsCount() const;
 
     /**
      * Get the partition cluster count.
@@ -216,7 +216,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition cluster count.
      */
-    int32_t GetClusterCount();
+    int32_t GetClusterCount() const;
 
     /**
      * Get the partition cluster size.
@@ -224,7 +224,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition cluster size.
      */
-    int32_t GetClusterSize();
+    int32_t GetClusterSize() const;
 
     /**
      * Get the partition size.
@@ -232,7 +232,7 @@ public:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @return The partition size.
      */
-    int32_t GetPartitionSize();
+    int32_t GetPartitionSize() const;
 
 private:
     /**
@@ -272,7 +272,7 @@ private:
      * @throws PartitionFileNotOpenedException When the partition file isn't opened.
      * @throws PartitionOutOfBoundsException When the position is out of partition bounds.
      */
-    void Write(int32_t position, void *source, size_t size);
+    void Write(int32_t position, const void *source, size_t size);
 
     /**
      * Do a basic boot record values validation.
@@ -280,7 +280,7 @@ private:
      * @param bootRecord The boot record to be validated.
      * @return True if the boot record values passed, false otherwise.
      */
-    bool ValidateBootRecord(boot_record &bootRecord);
+    bool ValidateBootRecord(const boot_record &bootRecord) const;
 
     /**
      * Compute the total count of mft items in partition of the given size.
@@ -288,7 +288,7 @@ private:
      * @param partitionSize The size of the partition.
      * @return The count of mft items.
      */
-    int32_t ComputeMftItemCount(int32_t partitionSize);
+    int32_t ComputeMftItemCount(int32_t partitionSize) const;
 
     /**
      * Compute the total count of clusters that will fit into the given size
@@ -296,7 +296,7 @@ private:
      * @param bitmapAndDataBlockSize The size that remains for the bitmap and the data segment.
      * @return The count of clusters.
      */
-    int32_t ComputeClusterCount(int32_t bitmapAndDataBlockSize);
+    int32_t ComputeClusterCount(int32_t bitmapAndDataBlockSize) const;
 };
 
 

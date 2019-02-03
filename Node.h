@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <vector>
 #include <string>
 #include <cstdint>
@@ -10,12 +9,9 @@
 /**
  * Class Node represents a ntfs file or a directory of some size
  * with an uid and a name. It contains an info about mft items
- * and clusters prepared for this node. If this node is new
- * or is changed, it needs to be saved via the NtfsNodeManager
- * to confirm the ownership of acquired resources by writing them
- * to the partition, else another node could take this resources
- * for itself (the uid, mft items and clusters).
- * The writing or reading from the node handles the NtfsNodeManager.
+ * and clusters assigned to this node.
+ * The creating and removing the node from the partition
+ * as well as writing and reading from the node handles the NtfsNodeManager.
  */
 class Node
 {
@@ -30,49 +26,49 @@ public:
      *
      * @return The uid.
      */
-    int32_t GetUid();
+    int32_t GetUid() const;
 
     /**
      * Get the node name.
      *
      * @return The name.
      */
-    std::string GetName();
+    std::string GetName() const;
 
     /**
      * Check whether the node is a directory or a file.
      *
      * @return True if it's a directory, false if it's a file.
      */
-    bool IsDirectory();
+    bool IsDirectory() const;
 
     /**
      * Get the node size.
      *
      * @return Size in bytes.
      */
-    int32_t GetSize();
+    int32_t GetSize() const;
 
     /**
      * Get the mft items acquired by this file.
      *
      * @return The vector of mft items.
      */
-    const std::vector<MftItem> &GetMftItems();
+    const std::vector<MftItem> &GetMftItems() const;
 
     /**
      * Get the fragments acquired by this node.
      *
      * @return The vector of fragments.
      */
-    std::vector<mft_fragment> GetFragments();
+    std::vector<mft_fragment> GetFragments() const;
 
     /**
      * Get the indexes of the clusters acquired by this node.
      *
      * @return The vector of cluster indexes.
      */
-    std::vector<int32_t> GetClusters();
+    std::vector<int32_t> GetClusters() const;
 
 private:
     /**
@@ -87,6 +83,8 @@ private:
      * and be sorted by the order.
      *
      * @param mftItems The vector of the nodes mft items.
+     *
+     * @throws NodeException When the mftItems vector is empty.
      */
     explicit Node(std::vector<MftItem> mftItems);
 };
