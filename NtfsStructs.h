@@ -5,7 +5,7 @@
 
 const std::size_t NODE_NAME_SIZE{12};                   // the size of the node name field (including the termination symbol)
 const int32_t MFT_FRAGMENTS_COUNT{32};                  // the max number of fragments per one mft item
-const int32_t FRAGMENT_UNUSED_START_ADDRESS{-1};        // the max number of fragments per one mft item
+const int32_t FRAGMENT_UNUSED_START{-1};        // the max number of fragments per one mft item
 const int32_t UID_ITEM_FREE{0};                         // the uid of a free mft item
 const int32_t UID_ROOT{1};                              // the uid of the root directory
 const bool BIT_CLUSTER_FREE{false};                     // the boolean value of bit in a bitmap representing a free cluster
@@ -33,7 +33,7 @@ struct boot_record
  */
 struct mft_fragment
 {
-    int32_t start_address;                              // the start address of the first cluster
+    int32_t start;                              // the start address of the first cluster
     int32_t count;                                      // the number of clusters
 };
 
