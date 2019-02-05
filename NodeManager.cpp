@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iostream>
 #include <chrono>
+#include <sstream>
 
 #include "NodeManager.h"
 #include "Exceptions/NodeManagerExceptions.h"
@@ -85,6 +86,18 @@ void NodeManager::ResizeNode(Node &node, int32_t size)
         SaveNode(node);
         throw;
     }
+}
+
+// done
+Node NodeManager::CloneNode(const Node &node)
+{
+    Node clone = CreateNode(node.GetName(), node.IsDirectory(), node.GetSize());
+    std::stringstream contents;
+
+    ReadFromNode(node, contents);
+    WriteIntoNode(clone, contents);
+
+    return clone;
 }
 
 // done
@@ -296,7 +309,7 @@ void NodeManager::SetupMftItems(std::vector<MftItem> &mftItems,
             if (fragmentsWritten < fragments.size()) {
                 // fragment is used
 
-                item.fragments[i] = fragments[i];
+                item.fragments[i] = fragments[fragmentsWritten];
                 fragmentsWritten++;
             }
             else {

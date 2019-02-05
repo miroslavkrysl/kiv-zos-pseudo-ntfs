@@ -22,11 +22,25 @@ class Node
 
 public:
     /**
+     * Defaulted empty Node constructor
+     */
+    Node() = default;
+
+    /**
      * Defaulted copy constructor.
      *
      * @param node The node being copied.
      */
     Node(const Node &node) = default;
+
+    /**
+     * Defaulted copy assignment operator.
+     *
+     * @param node The node to be copied.
+     *
+     * @return The copy of the given node.
+     */
+    Node &operator=(const Node &node) = default;
 
     /**
      * Move construct a Node from the given original node.
@@ -37,7 +51,7 @@ public:
     Node(Node &&node) noexcept;
 
     /**
-     * Move assign operator overload.
+     * Move assignment operator overload.
      *
      * @param node The node to be move assigned.
      *

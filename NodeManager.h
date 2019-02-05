@@ -73,6 +73,20 @@ public:
     void ResizeNode(Node &node, int32_t size);
 
     /**
+     * Clone the given node into a new node with a different uid.
+     * Allocates resources for the new node and copies the cloned node
+     * properties and its contents.
+     *
+     * @param node The node to be cloned.
+     *
+     * @throws NodeManagerNotEnoughFreeClustersException When there are not enough free clusters for the clone.
+     * @throws NodeManagerNotEnoughFreeMftItemsException When there are not enough free mft items for the number of fragments required by the clone.
+     *
+     * @return The new node with own uid - clone of the given node.
+     */
+    Node CloneNode(const Node &node);
+
+    /**
      * Find the node with the given uid.
      *
      * @param uid The uid of the node.

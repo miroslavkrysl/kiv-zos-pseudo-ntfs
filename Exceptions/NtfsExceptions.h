@@ -16,3 +16,23 @@ class NtfsNodeNameConflict : public NtfsException
 {
     using NtfsException::NtfsException;
 };
+
+class NtfsRootNotFoundException : public NtfsException
+{
+    using NtfsException::NtfsException;
+};
+
+class NtfsNodeNotFoundException : public NtfsException
+{
+    using NtfsException::NtfsException;
+};
+
+class NtfsNodeAlreadyExistsException : public NtfsException
+{
+    using NtfsException::NtfsException;
+};
+
+class NtfsDirectoryNotEmptyException : public NtfsException
+{
+    using NtfsException::NtfsException;
+};
