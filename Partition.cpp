@@ -44,7 +44,7 @@ Partition::Partition(std::string path)
     }
 }
 
-void Partition::Format(int32_t size, const std::string signature, const std::string description)
+void Partition::Format(int32_t size, std::string signature, std::string description)
 {
     // check arguments
     if (size > MAX_PARTITION_SIZE) {

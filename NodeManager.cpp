@@ -3,6 +3,7 @@
 #include <random>
 #include <cstring>
 #include <iostream>
+#include <chrono>
 
 #include "NodeManager.h"
 #include "Exceptions/NodeManagerExceptions.h"
@@ -56,8 +57,19 @@ void NodeManager::ReleaseNode(const Node &node)
 }
 
 // done
-Node NodeManager::ResizeNode(const Node &node, int32_t size)
+void NodeManager::ResizeNode(Node &node, int32_t size)
 {
+    auto capacity = GetNodeCapacity(node);
+
+    if (size <= capacity && size > capacity - m_partition.GetClusterSize()) {
+        // no need for the resources reallocation
+
+        SetupMftItems(node.m_mftItems, node.GetUid(), node.GetName(), node.IsDirectory(), size, node.GetFragments());
+        SaveNode(node);
+
+        return;
+    }
+
     ReleaseNode(node);
 
     try {
@@ -65,11 +77,9 @@ Node NodeManager::ResizeNode(const Node &node, int32_t size)
         auto mftItems = FindFreeMftItems(fragments.size());
 
         SetupMftItems(mftItems, node.GetUid(), node.GetName(), node.IsDirectory(), size, fragments);
+        node.m_mftItems = std::move(mftItems);
 
-        Node newNode{mftItems};
-        SaveNode(newNode);
-
-        return newNode;
+        SaveNode(node);
     }
     catch (NodeManagerException &exception) {
         SaveNode(node);
@@ -78,7 +88,7 @@ Node NodeManager::ResizeNode(const Node &node, int32_t size)
 }
 
 // done
-Node NodeManager::findNode(int32_t uid)
+Node NodeManager::FindNode(int32_t uid)
 {
     auto mftItems = m_partition.ReadMftItems(uid);
 
@@ -116,8 +126,9 @@ void NodeManager::ReadFromNode(const Node &node, std::ostream &destination)
 // done
 int32_t NodeManager::GetFreeUid()
 {
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int32_t> distribution(1, INT32_MAX);
+    static auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+    static std::default_random_engine generator{seed};
+    static std::uniform_int_distribution<int32_t> distribution(1, INT32_MAX);
 
     int32_t uid{0};
     bool unique{false};
@@ -294,4 +305,10 @@ void NodeManager::SetupMftItems(std::vector<MftItem> &mftItems,
             }
         }
     }
+}
+
+// done
+int32_t NodeManager::GetNodeCapacity(const Node &node) const
+{
+    return static_cast<int32_t>(node.GetClusters().size() * m_partition.GetClusterSize());
 }

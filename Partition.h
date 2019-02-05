@@ -33,7 +33,7 @@ public:
      * @param description The description of the partition.
      * @throws PartitionFileNotOpenedException If it fails to open the partition file.
      */
-    void Format(int32_t size, const std::string signature, const std::string description);
+    void Format(int32_t size, std::string signature, std::string description);
 
     /**
      * Read the mft item on the given index from the partition.

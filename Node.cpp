@@ -4,6 +4,18 @@
 #include "Exceptions/NodeExceptions.h"
 
 // done
+Node::Node(Node &&node) noexcept
+    : m_mftItems(std::move(node.m_mftItems))
+{}
+
+// done
+Node &Node::operator=(Node &&node) noexcept
+{
+    m_mftItems = std::move(node.m_mftItems);
+    return *this;
+}
+
+// done
 int32_t Node::GetUid() const
 {
     return m_mftItems.front().item.uid;

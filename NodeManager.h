@@ -21,6 +21,15 @@ public:
     explicit NodeManager(Partition &partition);
 
     /**
+     * Get the nodes clusters total capacity.
+     *
+     * @param node The node.
+     *
+     * @return The capacity in bytes.
+     */
+    int32_t GetNodeCapacity(const Node &node) const;
+
+    /**
      * Create a new node, find free resources on partition for it
      * and save it.
      *
@@ -52,19 +61,16 @@ public:
 
     /**
      * Try to acquire resources for the new size of the node.
-     * Initializes a new node with the same properties as the old node
-     * and releases resources of the old one.
-     * If it fails, the original node remains unchanged.
+     * If the current node capacity is sufficient
+     * and isn't unnecessarily big, the node remains unchanged.
      *
      * @param node The node to be resized.
      * @param size The new size of the node contents.
      *
      * @throws NodeManagerNotEnoughFreeClustersException When there are not enough free clusters for the new size.
      * @throws NodeManagerNotEnoughFreeMftItemsException When there are not enough free mft items for the fragments.
-     *
-     * @return The newly initialized Node instance with resources allocated for the new size.
      */
-    Node ResizeNode(const Node &node, int32_t size);
+    void ResizeNode(Node &node, int32_t size);
 
     /**
      * Find the node with the given uid.
@@ -75,7 +81,7 @@ public:
      *
      * @return The found node.
      */
-    Node findNode(int32_t uid);
+    Node FindNode(int32_t uid);
 
     /**
      * Write data from the given source into the partition clusters owned by the given node.

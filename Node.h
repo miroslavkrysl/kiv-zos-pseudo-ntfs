@@ -22,6 +22,30 @@ class Node
 
 public:
     /**
+     * Defaulted copy constructor.
+     *
+     * @param node The node being copied.
+     */
+    Node(const Node &node) = default;
+
+    /**
+     * Move construct a Node from the given original node.
+     * It moves the ownership of the mft items vector.
+     *
+     * @param node The original node.
+     */
+    Node(Node &&node) noexcept;
+
+    /**
+     * Move assign operator overload.
+     *
+     * @param node The node to be move assigned.
+     *
+     * @return The node that is being assigned to.
+     */
+    Node &operator=(Node &&node) noexcept;
+
+    /**
      * Get the node uid.
      *
      * @return The uid.
@@ -77,7 +101,7 @@ private:
     std::vector<MftItem> m_mftItems;
 
     /**
-     * Initialize a new NtfsNode.
+     * Initialize a new Node.
      * The given mft items must be filled with all the required
      * values (uid, name, size, isDirectory, order, count, fragments)
      * and be sorted by the order.
