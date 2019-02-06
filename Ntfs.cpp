@@ -9,11 +9,19 @@
 #include "Exceptions/NtfsExceptions.h"
 #include "Exceptions/NodeManagerExceptions.h"
 
+//done
 Ntfs::Ntfs(std::string partitionPath)
     : m_partition{std::move(partitionPath)},
       m_nodeManager{m_partition},
       m_currentDirectory{FindRoot()}
 {}
+
+// done
+bool Ntfs::IsOpened()
+{
+    return m_partition.IsOpened();
+}
+
 
 // done
 Node Ntfs::Pwd()

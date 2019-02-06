@@ -19,6 +19,13 @@ public:
     explicit Ntfs(std::string partitionPath);
 
     /**
+     * Check whether the partition is opened.
+     *
+     * @return True if so, false otherwise.
+     */
+    bool IsOpened();
+
+    /**
      * Get the current working directory.
      */
     Node Pwd();
