@@ -64,6 +64,11 @@ void Ntfs::Mkdir(std::string path)
     catch (NtfsNodeNotFoundException &exception) {
         throw NtfsPathNotFoundException{"parent directory not found"};
     }
+    catch (NtfsNotADirectoryException &exception) {
+        // parent node is not a directory
+        m_nodeManager.ReleaseNode(directory);
+        throw NtfsPathNotFoundException{"parent directory not found"};
+    }
     catch (NodeManagerException &exception) {
         // resources allocation failed
         m_nodeManager.ReleaseNode(directory);
@@ -111,63 +116,81 @@ void Ntfs::Rmdir(std::string path)
     }
 }
 
+// done
 void Ntfs::Mkfile(const std::string path, std::istream &contents, int32_t size)
 {
     auto parsedPath = ParsePath(path);
+
+    if (parsedPath.second.back() == "/") {
+        throw NtfsPathNotFoundException{"file not found"};
+    }
 
     // take the file name from path
     std::string fileName = parsedPath.second.back();
     parsedPath.second.pop_back();
 
-    // find the parent directory, where the file will be created
-    Node parent = FindNode(parsedPath.first, parsedPath.second);
-
-    if (!parent.IsDirectory()) {
-        throw NtfsNotADirectoryException{"the found parent node isn't a directory"};
-    }
-
-    // check for the names conflict
-    if (IsInDirectory(parent, fileName)) {
-        throw NtfsNodeAlreadyExistsException{"the node " + path + " already exists"};
-    }
-
-    Node node = m_nodeManager.CreateNode(fileName, false, size);
+    Node file;
 
     try {
-        AddIntoDirectory(parent, node);
+        // find the parent directory, where the file will be created
+        Node parent = FindNode(parsedPath.first, parsedPath.second);
 
-        m_nodeManager.WriteIntoNode(node, contents);
+        // create node for the file
+        file = m_nodeManager.CreateNode(fileName, false, size);
+
+        AddIntoDirectory(parent, file);
+
+        m_nodeManager.WriteIntoNode(file, contents);
+    }
+    catch (NtfsNodeNotFoundException &exception) {
+        throw NtfsPathNotFoundException{"parent directory not found"};
+    }
+    catch (NtfsNotADirectoryException &exception) {
+        // parent node is not a directory
+        m_nodeManager.ReleaseNode(file);
+        throw NtfsPathNotFoundException{"parent directory not found"};
     }
     catch (NodeManagerException &exception) {
-        m_nodeManager.ReleaseNode(node);
+        // resources allocation failed
+        m_nodeManager.ReleaseNode(file);
+        throw;
+    }
+    catch (NtfsNodeAlreadyExistsException &exception) {
+        m_nodeManager.ReleaseNode(file);
         throw;
     }
 }
 
-void Ntfs::Rm(std::string path)
+// done
+void Ntfs::Rmfile(std::string path)
 {
     auto parsedPath = ParsePath(std::move(path));
 
-    // take the node name from path
-    std::string directoryName = parsedPath.second.back();
+    if (parsedPath.second.back() == "/") {
+        throw NtfsPathNotFoundException{"file not found"};
+    }
+
+    // take the file name from path
+    std::string fileName = parsedPath.second.back();
     parsedPath.second.pop_back();
 
-    // find the parent directory of the file being removed
-    Node parent = FindNode(parsedPath.first, parsedPath.second);
+    try {
+        // find the parent directory of the file being removed
+        Node parent = FindNode(parsedPath.first, parsedPath.second);
 
-    if (!parent.IsDirectory()) {
-        throw NtfsNodeNotFoundException{"can't find the node"};
+        // find the file being removed itself
+        Node file = FindNode(parent, std::list<std::string>{fileName});
+
+        if (file.IsDirectory()) {
+            throw NtfsPathNotFoundException{"file not found"};
+        }
+
+        RemoveFromDirectory(parent, file);
+        m_nodeManager.ReleaseNode(file);
     }
-
-    // find the node being removed itself
-    Node node = FindNode(parent, std::list<std::string>{directoryName});
-
-    if (node.IsDirectory()) {
-        throw NtfsNotAFileException{"the node is not a file"};
+    catch (NtfsNodeNotFoundException &exception) {
+        throw NtfsPathNotFoundException{"file not found"};
     }
-
-    RemoveFromDirectory(parent, node);
-    m_nodeManager.ReleaseNode(node);
 }
 
 void Ntfs::Mv(const std::string sourcePath, std::string destinationPath)
@@ -180,9 +203,28 @@ void Ntfs::Cp(std::string sourcePath, std::string destinationPath)
 
 }
 
-void Ntfs::Cat(const std::string path, std::ostream &output)
+// done
+void Ntfs::Cat(std::string path, std::ostream &output)
 {
+    auto parsedPath = ParsePath(std::move(path));
 
+    if (parsedPath.second.back() == "/") {
+        throw NtfsPathNotFoundException{"file not found"};
+    }
+
+    try {
+        // find the file node
+        Node file = FindNode(parsedPath.first, parsedPath.second);
+
+        if (file.IsDirectory()) {
+            throw NtfsPathNotFoundException{"file not found"};
+        }
+
+        m_nodeManager.ReadFromNode(file, output);
+    }
+    catch (NtfsNodeNotFoundException &exception) {
+        throw NtfsPathNotFoundException{"file not found"};
+    }
 }
 
 //done

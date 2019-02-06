@@ -59,8 +59,7 @@ public:
      * @param contents The stream of file contents.
      * @param size The size of the file contents.
      *
-     * @throws NtfsNodeNotFoundException When the path is not found.
-     * @throws NtfsNotADirectoryException When the parent of the file being created is not a directory.
+     * @throws NtfsPathNotFoundException When the destination directory is not found.
      * @throws NtfsNodeAlreadyExistsException When the node of the given path already exists.
      */
     void Mkfile(std::string path, std::istream &contents, int32_t size);
@@ -70,16 +69,15 @@ public:
      *
      * @param path The file path - absolute or relative to the current working directory.
      *
-     * @throws NtfsNodeNotFoundException When the node is not found.
-     * @throws NtfsNotAFileException When the found node is not a file.
+     * @throws NtfsPathNotFoundException When the file is not found.
      */
-    void Rm(std::string path);
+    void Rmfile(std::string path);
 
     /**
      * Move the node and its child nodes to the new destination.
      *
-     * @param sourcePath The path of the node to be moved.
-     * @param destinationPath The destination path.
+     * @param sourcePath The path of the node to be moved - absolute or relative to the current working directory.
+     * @param destinationPath The destination path - absolute or relative to the current working directory.
      *
      * @throws NtfsNodeNotFoundException When the source path is not found.
      * @throws NtfsNotADirectoryException When the new parent of the node is not a directory.
@@ -90,8 +88,8 @@ public:
     /**
      * Copy the node and its child nodes to the new destination.
      *
-     * @param sourcePath The path of the node to be copied.
-     * @param destinationPath The destination path.
+     * @param sourcePath The path of the node to be copied - absolute or relative to the current working directory.
+     * @param destinationPath The destination path - absolute or relative to the current working directory.
      *
      * @throws NtfsNodeNotFoundException When the source path is not found.
      * @throws NtfsNotADirectoryException When the new parent of the node is not a directory.
@@ -99,6 +97,12 @@ public:
      */
     void Cp(std::string sourcePath, std::string destinationPath);
 
+    /**
+     * Print file contents into the output stream.
+     *
+     * @param path The file path - absolute or relative to the current working directory.
+     * @param output The output stream.
+     */
     void Cat(std::string path, std::ostream &output);
 
     /**
