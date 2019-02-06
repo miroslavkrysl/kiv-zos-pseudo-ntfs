@@ -9,6 +9,7 @@
 
 class Ntfs
 {
+    friend class NtfsChecker;
 public:
     explicit Ntfs(std::string partitionPath);
 
@@ -48,7 +49,8 @@ public:
      *
      * @param path The directory path - absolute or relative to the current working directory.
      *
-     * @throws NtfsPathNotFoundException When the directory is not found.
+     * @throws NtfsFileNotFoundException When the directory is not found.
+     * @throws NtfsDirectoryNotEmptyException When the directory is not empty.
      */
     void Rmdir(std::string path);
 
@@ -69,7 +71,7 @@ public:
      *
      * @param path The file path - absolute or relative to the current working directory.
      *
-     * @throws NtfsPathNotFoundException When the file is not found.
+     * @throws NtfsFileNotFoundException When the file is not found.
      */
     void Rmfile(std::string path);
 
@@ -79,8 +81,8 @@ public:
      * @param sourcePath The path of the node to be moved - absolute or relative to the current working directory.
      * @param destinationPath The destination path - absolute or relative to the current working directory.
      *
-     * @throws NtfsNodeNotFoundException When the source path is not found.
-     * @throws NtfsNotADirectoryException When the new parent of the node is not a directory.
+     * @throws NtfsFileNotFoundException When the source path is not found.
+     * @throws NtfsPathNotFoundException When the destination directory is not found.
      * @throws NtfsNodeAlreadyExistsException When the node of the destination path already exists.
      */
     void Mv(std::string sourcePath, std::string destinationPath);
@@ -114,7 +116,7 @@ public:
      */
     void Format(int32_t size, std::string signature, std::string description);
 
-//private:
+private:
     /**
      * The ntfs partition which this ntfs operates on.
      */

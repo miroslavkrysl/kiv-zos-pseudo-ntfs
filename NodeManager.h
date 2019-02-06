@@ -73,6 +73,14 @@ public:
     void ResizeNode(Node &node, int32_t size);
 
     /**
+     * Rename the node.
+     *
+     * @param node The node to be renamed.
+     * @param name The new node name.
+     */
+    void RenameNode(Node &node, std::string name);
+
+    /**
      * Clone the given node into a new node with a different uid.
      * Allocates resources for the new node and copies the cloned node
      * properties and its contents.

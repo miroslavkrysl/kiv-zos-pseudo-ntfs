@@ -1,5 +1,7 @@
 #include <utility>
 
+#include <utility>
+
 #include <random>
 #include <cstring>
 #include <iostream>
@@ -86,6 +88,13 @@ void NodeManager::ResizeNode(Node &node, int32_t size)
         SaveNode(node);
         throw;
     }
+}
+
+// done
+void NodeManager::RenameNode(Node &node, std::string name)
+{
+    SetupMftItems(node.m_mftItems, node.GetUid(), std::move(name), node.IsDirectory(), node.GetSize(), node.GetFragments());
+    SaveNode(node);
 }
 
 // done

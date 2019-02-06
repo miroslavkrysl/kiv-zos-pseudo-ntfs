@@ -37,6 +37,11 @@ class NtfsPathNotFoundException : public NtfsException
     using NtfsException::NtfsException;
 };
 
+class NtfsFileNotFoundException : public NtfsException
+{
+    using NtfsException::NtfsException;
+};
+
 class NtfsNodeAlreadyExistsException : public NtfsException
 {
     using NtfsException::NtfsException;
