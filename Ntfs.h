@@ -11,6 +11,11 @@ class Ntfs
 {
     friend class NtfsChecker;
 public:
+    /**
+     * Initializes a ntfs bound to the partition file on the given path.
+     *
+     * @param partitionPath The partition file path.
+     */
     explicit Ntfs(std::string partitionPath);
 
     /**
