@@ -12,6 +12,11 @@ class NtfsNotADirectoryException : public NtfsException
     using NtfsException::NtfsException;
 };
 
+class NtfsNotAFileException : public NtfsException
+{
+    using NtfsException::NtfsException;
+};
+
 class NtfsNodeNameConflict : public NtfsException
 {
     using NtfsException::NtfsException;
@@ -23,6 +28,11 @@ class NtfsRootNotFoundException : public NtfsException
 };
 
 class NtfsNodeNotFoundException : public NtfsException
+{
+    using NtfsException::NtfsException;
+};
+
+class NtfsPathNotFoundException : public NtfsException
 {
     using NtfsException::NtfsException;
 };

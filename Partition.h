@@ -11,6 +11,7 @@
  */
 class Partition
 {
+    friend class NtfsChecker;
 public:
     /**
      * Initialize a Partition instance bound to the given file.

@@ -12,37 +12,102 @@ class Ntfs
 public:
     explicit Ntfs(std::string partitionPath);
 
-    Partition &GetPartition();
+    /**
+     * Change the current working directory.
+     *
+     * @param path The wanted working directory.
+     *
+     * @throws NtfsNodeNotFoundException When the node is not found.
+     * @throws NtfsNotADirectoryException When the node is not a directory.
+     */
+    void Cd(std::string path);
 
-    std::vector<Node> Ls(const std::string &path = ".");
+    /**
+     * Get the directory contents.
+     *
+     * @param path The directory path - absolute or relative to the current working directory.
+     *
+     * @throws NtfsPathNotFoundException When the directory is not found.
+     *
+     * @return The list of directory child nodes.
+     */
+    std::list<Node> Ls(std::string path = ".");
 
     /**
      * Create a directory on the given path.
      *
      * @param path The directory path - absolute or relative to the current working directory.
      *
-     * @throws NtfsNodeNotFoundException When the node is not found.
-     * @throws NtfsNotADirectoryException When the parent of the directory being created is not a directory.
+     * @throws NtfsPathNotFoundException When the destination directory is not found.
      * @throws NtfsNodeAlreadyExistsException When the node of the given path already exists.
      */
-    void Mkdir(const std::string &path);
+    void Mkdir(std::string path);
 
     /**
      * Remove a directory on the given path.
      *
      * @param path The directory path - absolute or relative to the current working directory.
      *
-     * @throws NtfsNodeNotFoundException When the node is not found.
-     * @throws NtfsNotADirectoryException When the node is not a directory.
-     * @throws NtfsDirectoryNotEmptyException When the directory is not empty.
+     * @throws NtfsPathNotFoundException When the directory is not found.
      */
-    void Rmdir(const std::string &path);
+    void Rmdir(std::string path);
 
-    void Mkfile(const std::string &path, std::istream &contents, int32_t size); // find node with parent
-    void Rm(const std::string &path); // find node with parent
-    void Mv(const std::string &sourcePath, std::string &destinationPath); // find node with parent
-    void Cp(std::string &sourcePath, std::string &destinationPath); // find node with parent, clone node
-    void Cat(const std::string &path, std::ostream &output); // find node
+    /**
+     * Create a new file.
+     *
+     * @param path The file path - absolute or relative to the current working directory.
+     * @param contents The stream of file contents.
+     * @param size The size of the file contents.
+     *
+     * @throws NtfsNodeNotFoundException When the path is not found.
+     * @throws NtfsNotADirectoryException When the parent of the file being created is not a directory.
+     * @throws NtfsNodeAlreadyExistsException When the node of the given path already exists.
+     */
+    void Mkfile(std::string path, std::istream &contents, int32_t size);
+
+    /**
+     * Remove the file.
+     *
+     * @param path The file path - absolute or relative to the current working directory.
+     *
+     * @throws NtfsNodeNotFoundException When the node is not found.
+     * @throws NtfsNotAFileException When the found node is not a file.
+     */
+    void Rm(std::string path);
+
+    /**
+     * Move the node and its child nodes to the new destination.
+     *
+     * @param sourcePath The path of the node to be moved.
+     * @param destinationPath The destination path.
+     *
+     * @throws NtfsNodeNotFoundException When the source path is not found.
+     * @throws NtfsNotADirectoryException When the new parent of the node is not a directory.
+     * @throws NtfsNodeAlreadyExistsException When the node of the destination path already exists.
+     */
+    void Mv(std::string sourcePath, std::string destinationPath);
+
+    /**
+     * Copy the node and its child nodes to the new destination.
+     *
+     * @param sourcePath The path of the node to be copied.
+     * @param destinationPath The destination path.
+     *
+     * @throws NtfsNodeNotFoundException When the source path is not found.
+     * @throws NtfsNotADirectoryException When the new parent of the node is not a directory.
+     * @throws NtfsNodeAlreadyExistsException When the node of the destination path already exists.
+     */
+    void Cp(std::string sourcePath, std::string destinationPath);
+
+    void Cat(std::string path, std::ostream &output);
+
+    /**
+     * Format the partition.
+     *
+     * @param size The new size of the partition.
+     * @param signature The signature of the partition.
+     * @param description The partition description.
+     */
     void Format(int32_t size, std::string signature, std::string description);
 
 //private:
@@ -96,7 +161,8 @@ public:
     /**
      * Parse the path into the individual path nodes
      * and a starting directory.
-     * If the path starts with `\`, the root node will be returned
+     * If the path ends with `/`, adds it on the end of the path nodes list.
+     * If the path starts with `/`, the root node will be returned
      * as a start directory, else the current working directory
      * will be the start directory.
      *

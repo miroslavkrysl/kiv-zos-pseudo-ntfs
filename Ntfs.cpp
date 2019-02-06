@@ -1,4 +1,6 @@
 #include <utility>
+
+#include <utility>
 #include <algorithm>
 #include <sstream>
 #include <iostream>
@@ -13,26 +15,111 @@ Ntfs::Ntfs(std::string partitionPath)
       m_currentDirectory{FindRoot()}
 {}
 
-Partition &Ntfs::GetPartition()
+// done
+std::list<Node> Ntfs::Ls(std::string path)
 {
-    return m_partition;
-}
+    auto parsedPath = ParsePath(std::move(path));
 
-std::vector<Node> Ntfs::Ls(const std::string &path)
-{
-    return std::vector<Node>{};
+    if (parsedPath.second.back() == "/") {
+        parsedPath.second.pop_back();
+    }
+
+    try {
+        // find the directory node
+        Node directory = FindNode(parsedPath.first, parsedPath.second);
+        return GetDirectoryContents(directory);
+    }
+    catch (NtfsException &exception) {
+        throw NtfsPathNotFoundException{"directory not found"};
+    }
 }
 
 // done
-void Ntfs::Mkdir(const std::string &path)
+void Ntfs::Mkdir(std::string path)
 {
     auto parsedPath = ParsePath(path);
+
+    if (parsedPath.second.back() == "/") {
+        parsedPath.second.pop_back();
+    }
 
     // take the directory name from path
     std::string directoryName = parsedPath.second.back();
     parsedPath.second.pop_back();
 
-    // find the parent directory, where the directory will be created
+    Node directory;
+
+    try {
+        // find the parent directory, where the directory will be created
+        Node parent = FindNode(parsedPath.first, parsedPath.second);
+
+        // create node for the directory
+        directory = m_nodeManager.CreateNode(directoryName, true, sizeof(int32_t));
+        AddIntoDirectory(parent, directory);
+
+        // write parent uid into the directory
+        int32_t parentUid = parent.GetUid();
+        m_nodeManager.WriteIntoNode(directory, &parentUid);
+    }
+    catch (NtfsNodeNotFoundException &exception) {
+        throw NtfsPathNotFoundException{"parent directory not found"};
+    }
+    catch (NodeManagerException &exception) {
+        // resources allocation failed
+        m_nodeManager.ReleaseNode(directory);
+        throw;
+    }
+    catch (NtfsNodeAlreadyExistsException &exception) {
+        m_nodeManager.ReleaseNode(directory);
+        throw;
+    }
+}
+
+// done
+void Ntfs::Rmdir(std::string path)
+{
+    auto parsedPath = ParsePath(std::move(path));
+
+    if (parsedPath.second.back() == "/") {
+        parsedPath.second.pop_back();
+    }
+
+    // take the directory name from path
+    std::string directoryName = parsedPath.second.back();
+    parsedPath.second.pop_back();
+
+    try {
+        // find the parent directory of the directory being removed
+        Node parent = FindNode(parsedPath.first, parsedPath.second);
+
+        // find the directory being removed itself
+        Node directory = FindNode(parent, std::list<std::string>{directoryName});
+
+        if (!directory.IsDirectory()) {
+            throw NtfsPathNotFoundException{"directory not found"};
+        }
+
+        if (directory.GetSize() > sizeof(int32_t)) {
+            throw NtfsDirectoryNotEmptyException{"the directory is not empty"};
+        }
+
+        RemoveFromDirectory(parent, directory);
+        m_nodeManager.ReleaseNode(directory);
+    }
+    catch (NtfsNodeNotFoundException &exception) {
+        throw NtfsPathNotFoundException{"directory not found"};
+    }
+}
+
+void Ntfs::Mkfile(const std::string path, std::istream &contents, int32_t size)
+{
+    auto parsedPath = ParsePath(path);
+
+    // take the file name from path
+    std::string fileName = parsedPath.second.back();
+    parsedPath.second.pop_back();
+
+    // find the parent directory, where the file will be created
     Node parent = FindNode(parsedPath.first, parsedPath.second);
 
     if (!parent.IsDirectory()) {
@@ -40,82 +127,68 @@ void Ntfs::Mkdir(const std::string &path)
     }
 
     // check for the names conflict
-    if (IsInDirectory(parent, directoryName)) {
+    if (IsInDirectory(parent, fileName)) {
         throw NtfsNodeAlreadyExistsException{"the node " + path + " already exists"};
     }
 
-    Node directory = m_nodeManager.CreateNode(directoryName, true, sizeof(int32_t));
+    Node node = m_nodeManager.CreateNode(fileName, false, size);
 
     try {
-        AddIntoDirectory(parent, directory);
+        AddIntoDirectory(parent, node);
 
-        int32_t parentUid = parent.GetUid();
-        m_nodeManager.WriteIntoNode(directory, &parentUid);
+        m_nodeManager.WriteIntoNode(node, contents);
     }
     catch (NodeManagerException &exception) {
-        m_nodeManager.ReleaseNode(directory);
+        m_nodeManager.ReleaseNode(node);
         throw;
     }
 }
 
-void Ntfs::Rmdir(const std::string &path)
+void Ntfs::Rm(std::string path)
 {
-    auto parsedPath = ParsePath(path);
+    auto parsedPath = ParsePath(std::move(path));
 
-    // take the directory name from path
+    // take the node name from path
     std::string directoryName = parsedPath.second.back();
     parsedPath.second.pop_back();
 
-    // find the parent directory of the directory being removed
+    // find the parent directory of the file being removed
     Node parent = FindNode(parsedPath.first, parsedPath.second);
 
     if (!parent.IsDirectory()) {
-        throw NtfsNodeNotFoundException{"can't find the directory"};
+        throw NtfsNodeNotFoundException{"can't find the node"};
     }
 
-    // find the directory being removed itself
-    Node directory = FindNode(parent, std::list<std::string>{directoryName});
+    // find the node being removed itself
+    Node node = FindNode(parent, std::list<std::string>{directoryName});
 
-    if (!directory.IsDirectory()) {
-        throw NtfsNotADirectoryException{"the node is not a directory"};
+    if (node.IsDirectory()) {
+        throw NtfsNotAFileException{"the node is not a file"};
     }
 
-    if (directory.GetSize() > sizeof(int32_t)) {
-        throw NtfsDirectoryNotEmptyException{"the directory is not empty"};
-    }
-
-    RemoveFromDirectory(parent, directory);
-    m_nodeManager.ReleaseNode(directory);
+    RemoveFromDirectory(parent, node);
+    m_nodeManager.ReleaseNode(node);
 }
 
-void Ntfs::Mkfile(const std::string &path, std::istream &contents, int32_t size)
+void Ntfs::Mv(const std::string sourcePath, std::string destinationPath)
 {
 
 }
 
-void Ntfs::Rm(const std::string &path)
+void Ntfs::Cp(std::string sourcePath, std::string destinationPath)
 {
 
 }
 
-void Ntfs::Mv(const std::string &sourcePath, std::string &destinationPath)
+void Ntfs::Cat(const std::string path, std::ostream &output)
 {
 
 }
 
-void Ntfs::Cp(std::string &sourcePath, std::string &destinationPath)
-{
-
-}
-
-void Ntfs::Cat(const std::string &path, std::ostream &output)
-{
-
-}
-
+//done
 void Ntfs::Format(int32_t size, std::string signature, std::string description)
 {
-
+    m_partition.Format(size, signature, description);
 }
 
 // done
@@ -210,10 +283,6 @@ std::pair<Node, std::list<std::string>> Ntfs::ParsePath(std::string path)
     std::list<std::string> pathNodes;
     Node start;
 
-    if (path.back() == '/') {
-        path.pop_back();
-    }
-
     if (path.front() == '/') {
         start = FindRoot();
         path.erase(0, 1);
@@ -222,11 +291,22 @@ std::pair<Node, std::list<std::string>> Ntfs::ParsePath(std::string path)
         start = m_currentDirectory;
     }
 
+    bool endSlash = false;
+
+    if (path.back() == '/') {
+        endSlash = true;
+        path.pop_back();
+    }
+
     std::string item;
     std::stringstream ss(path);
 
     while (std::getline(ss, item, '/')) {
-        pathNodes.push_back(item);
+        pathNodes.emplace_back(item);
+    }
+
+    if (endSlash) {
+        pathNodes.emplace_back("/");
     }
 
     return {std::move(start), std::move(pathNodes)};
@@ -243,7 +323,15 @@ Node Ntfs::FindNode(const Node &directory, const std::list<std::string> &path)
         }
 
         bool notFound = true;
-        auto items = GetDirectoryContents(currentNode);
+
+        std::list<Node> items;
+
+        try {
+            items = GetDirectoryContents(currentNode);
+        }
+        catch (NtfsNotADirectoryException &exception) {
+            throw NtfsNodeNotFoundException{"node on the given path from the given directory not exists"};
+        }
 
         if (pathNode == "..") {
             currentNode = std::move(items.front());
