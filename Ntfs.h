@@ -14,12 +14,16 @@ public:
     explicit Ntfs(std::string partitionPath);
 
     /**
+     * Get the current working directory.
+     */
+    Node Pwd();
+
+    /**
      * Change the current working directory.
      *
      * @param path The wanted working directory.
      *
-     * @throws NtfsNodeNotFoundException When the node is not found.
-     * @throws NtfsNotADirectoryException When the node is not a directory.
+     * @throws NtfsPathNotFoundException When the directory is not found.
      */
     void Cd(std::string path);
 

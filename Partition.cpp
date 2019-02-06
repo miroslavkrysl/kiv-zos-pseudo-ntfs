@@ -514,6 +514,7 @@ void Partition::Write(int32_t position, const void *source, size_t size)
 
     m_file.seekp(position);
     m_file.write(static_cast<const char *>(source), size);
+    m_file.flush();
 }
 
 // done

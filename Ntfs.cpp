@@ -16,7 +16,13 @@ Ntfs::Ntfs(std::string partitionPath)
 {}
 
 // done
-std::list<Node> Ntfs::Ls(std::string path)
+Node Ntfs::Pwd()
+{
+    return m_currentDirectory;
+}
+
+// done
+void Ntfs::Cd(std::string path)
 {
     auto parsedPath = ParsePath(std::move(path));
 
@@ -27,6 +33,31 @@ std::list<Node> Ntfs::Ls(std::string path)
     try {
         // find the directory node
         Node directory = FindNode(parsedPath.first, parsedPath.second);
+
+        if (!directory.IsDirectory()) {
+            throw NtfsPathNotFoundException{"directory not found"};
+        }
+
+        m_currentDirectory = directory;
+    }
+    catch (NtfsNodeNotFoundException &exception) {
+        throw NtfsPathNotFoundException{"directory not found"};
+    }
+}
+
+// done
+std::list<Node> Ntfs::Ls(std::string path)
+{
+    auto parsedPath = ParsePath(std::move(path));
+
+    if (!parsedPath.second.empty() && parsedPath.second.back() == "/") {
+        parsedPath.second.pop_back();
+    }
+
+    try {
+        // find the directory node
+        Node directory = FindNode(parsedPath.first, parsedPath.second);
+
         return GetDirectoryContents(directory);
     }
     catch (NtfsException &exception) {
