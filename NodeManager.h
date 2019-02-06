@@ -81,18 +81,19 @@ public:
     void RenameNode(Node &node, std::string name);
 
     /**
-     * Clone the given node into a new node with a different uid.
+     * Clone the given node into a new node with a different uid and own name.
      * Allocates resources for the new node and copies the cloned node
      * properties and its contents.
      *
      * @param node The node to be cloned.
+     * @param name The name of the clone.
      *
      * @throws NodeManagerNotEnoughFreeClustersException When there are not enough free clusters for the clone.
      * @throws NodeManagerNotEnoughFreeMftItemsException When there are not enough free mft items for the number of fragments required by the clone.
      *
      * @return The new node with own uid - clone of the given node.
      */
-    Node CloneNode(const Node &node);
+    Node CloneNode(const Node &node, std::string name);
 
     /**
      * Find the node with the given uid.

@@ -92,16 +92,16 @@ public:
     void Mv(std::string sourcePath, std::string destinationPath);
 
     /**
-     * Copy the node and its child nodes to the new destination.
+     * Copy the file and its contents to the new destination.
      *
-     * @param sourcePath The path of the node to be copied - absolute or relative to the current working directory.
+     * @param sourcePath The path of the file to be copied - absolute or relative to the current working directory.
      * @param destinationPath The destination path - absolute or relative to the current working directory.
      *
-     * @throws NtfsNodeNotFoundException When the source path is not found.
-     * @throws NtfsNotADirectoryException When the new parent of the node is not a directory.
+     * @throws NtfsFileNotFoundException When the source file is not found.
+     * @throws NtfsPathNotFoundException When the destination directory is not found.
      * @throws NtfsNodeAlreadyExistsException When the node of the destination path already exists.
      */
-    void Cp(std::string sourcePath, std::string destinationPath);
+    void Cpfile(std::string sourcePath, std::string destinationPath);
 
     /**
      * Print file contents into the output stream.
@@ -119,6 +119,17 @@ public:
      * @param description The partition description.
      */
     void Format(int32_t size, std::string signature, std::string description);
+
+    /**
+    * Find the node.
+    *
+    * @param path The node path.
+    *
+    * @throws NtfsNodeNotFoundException When the node is not found.
+    *
+    * @return The found node.
+    */
+    Node FindNode(std::string path);
 
 private:
     /**
@@ -183,16 +194,18 @@ private:
     std::pair<Node, std::list<std::string>> ParsePath(std::string path);
 
     /**
-     * Find the node inside the partition directory tree
-     * starting from the given directory node.
-     * The path node symbol `..` means jump one directory up,
-     * `.` means do not jump anywhere.
-     *
-     * @param directory The start directory node.
-     * @param path The node path.
-     *
-     * @return The found node.
-     */
+    * Find the node inside the partition directory tree
+    * starting from the given directory node.
+    * The path node symbol `..` means jump one directory up,
+    * `.` means do not jump anywhere.
+    *
+    * @param directory The start directory node.
+    * @param path The node path.
+    *
+    * @throws NtfsNodeNotFoundException When the node is not found.
+    *
+    * @return The found node.
+    */
     Node FindNode(const Node &directory, const std::list<std::string> &path);
 
     /**

@@ -497,6 +497,7 @@ void Partition::Read(int32_t position, void *destination, size_t size)
         throw PartitionOutOfBoundsException{"trying to read outside of the partition"};
     }
 
+    m_file.flush();
     m_file.seekg(position);
     m_file.read(static_cast<char *>(destination), size);
 }

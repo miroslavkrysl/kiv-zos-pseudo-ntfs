@@ -98,9 +98,9 @@ void NodeManager::RenameNode(Node &node, std::string name)
 }
 
 // done
-Node NodeManager::CloneNode(const Node &node)
+Node NodeManager::CloneNode(const Node &node, std::string name)
 {
-    Node clone = CreateNode(node.GetName(), node.IsDirectory(), node.GetSize());
+    Node clone = CreateNode(name, node.IsDirectory(), node.GetSize());
     std::stringstream contents;
 
     ReadFromNode(node, contents);

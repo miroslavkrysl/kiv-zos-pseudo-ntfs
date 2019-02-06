@@ -302,9 +302,70 @@ void Ntfs::Mv(std::string sourcePath, std::string destinationPath)
     }
 }
 
-void Ntfs::Cp(std::string sourcePath, std::string destinationPath)
+//done
+void Ntfs::Cpfile(std::string sourcePath, std::string destinationPath)
 {
+    auto srcPath = ParsePath(std::move(sourcePath));
 
+    if (srcPath.second.back() == "/") {
+        throw NtfsFileNotFoundException{"source file not found"};
+    }
+
+    Node src;
+
+    try {
+        // find the src node
+        src = FindNode(srcPath.first, srcPath.second);
+
+        if (src.IsDirectory()) {
+            throw NtfsFileNotFoundException{"source file not found"};
+        }
+    }
+    catch (NtfsNodeNotFoundException &exception) {
+        throw NtfsFileNotFoundException{"source file not found"};
+    }
+
+
+    auto destPath = ParsePath(std::move(destinationPath));
+
+    // take the dest name from path or from the original name
+    std::string destName;
+
+    if (destPath.second.back() == "/") {
+        destName = src.GetName();
+    }
+    else {
+        destName = destPath.second.back();
+    }
+    destPath.second.pop_back();
+
+    Node dest;
+    Node nodeCopy;
+
+    try {
+        // find the dest node
+        dest = FindNode(destPath.first, destPath.second);
+
+        nodeCopy = m_nodeManager.CloneNode(src, destName);
+
+        AddIntoDirectory(dest, nodeCopy);
+    }
+    catch (NtfsNodeNotFoundException &exception) {
+        throw NtfsPathNotFoundException{"destination directory not found"};
+    }
+    catch (NtfsNotADirectoryException &exception) {
+        // dest node is not a directory
+        m_nodeManager.ReleaseNode(nodeCopy);
+        throw NtfsPathNotFoundException{"destination directory not found"};
+    }
+    catch (NodeManagerException &exception) {
+        // resources allocation failed
+        throw;
+    }
+    catch (NtfsNodeAlreadyExistsException &exception) {
+        m_nodeManager.ReleaseNode(nodeCopy);
+        throw;
+    }
 }
 
 // done
@@ -334,7 +395,28 @@ void Ntfs::Cat(std::string path, std::ostream &output)
 //done
 void Ntfs::Format(int32_t size, std::string signature, std::string description)
 {
-    m_partition.Format(size, signature, description);
+    m_partition.Format(size, std::move(signature), std::move(description));
+}
+
+// done
+Node Ntfs::FindNode(std::string path)
+{
+    auto parsedPath = ParsePath(std::move(path));
+
+    bool nodeIsDir = false;
+
+    if (parsedPath.second.back() == "/") {
+        nodeIsDir = true;
+        parsedPath.second.pop_back();
+    }
+
+    Node file = FindNode(parsedPath.first, parsedPath.second);
+
+    if (nodeIsDir && !file.IsDirectory()) {
+        throw NtfsNodeNotFoundException{"node not found"};
+    }
+
+    return file;
 }
 
 // done
