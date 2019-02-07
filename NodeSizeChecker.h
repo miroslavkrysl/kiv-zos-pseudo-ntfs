@@ -3,6 +3,7 @@
 #include <mutex>
 #include <set>
 #include <atomic>
+#include <memory>
 
 #include "Ntfs.h"
 
@@ -47,7 +48,18 @@ private:
      * The mutex to block multiple threads
      * to access the GetNextFile function concurrently.
      */
-    std::mutex m_mutex;
+    std::mutex m_mutexGetFile;
+
+    /**
+     * The mutex to block multiple threads
+     * to access the PrintMessage function concurrently.
+     */
+    std::mutex m_mutexPrintMessage;
+
+    /**
+     * The number of mft items present on the partition.
+     */
+    int32_t m_mftItemCount;
 
     /**
      * Indicates whether the nodes check succeeded.
@@ -65,11 +77,18 @@ private:
     std::set<int32_t> m_checkedNodes;
 
     /**
-     * Get the next file to process;
+     * Get the next node to process;
      *
-     * @return The uid of the node to check, -1 if there are no more nodes to check.
+     * @return The next node to check of the node to check, nullptr if there are no more nodes to check.
      */
-    int32_t GetNextNode();
+    std::unique_ptr<Node> GetNextNode();
+
+    /**
+     * Print message into the output.
+     *
+     * @param message The message.
+     */
+    void PrintMessage(const std::string &message);
 
     /**
      * Run the function that repeatedly asks for a node to check
