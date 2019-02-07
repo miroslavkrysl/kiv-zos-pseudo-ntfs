@@ -60,6 +60,7 @@ private:
         {"bootrecord", &Shell::CmdBootrecord},
         {"mft", &Shell::CmdMft},
         {"bitmap", &Shell::CmdBitmap},
+        {"check", &Shell::CmdCheck},
     };
 
     /**
@@ -237,4 +238,10 @@ private:
      */
     void CmdBitmap(std::vector<std::string> arguments);
 
+    /**
+     * Check the partition consistency.
+     *
+     * @param arguments Only the command name.
+     */
+    void CmdCheck(std::vector<std::string> arguments);
 };

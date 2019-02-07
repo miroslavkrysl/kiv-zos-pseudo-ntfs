@@ -1,16 +1,19 @@
+#include <limits>
+#include <cmath>
 #include "NtfsChecker.h"
 #include "Text.h"
 #include "Exceptions/PartitionExceptions.h"
+#include "NodeSizeChecker.h"
 
 // done
 NtfsChecker::NtfsChecker(Ntfs &ntfs)
-    : ntfs(ntfs)
+    : m_ntfs(ntfs)
 {}
 
 // done
 void NtfsChecker::PrintBootRecord(std::ostream &output)
 {
-    Partition &partition = ntfs.m_partition;
+    Partition &partition = m_ntfs.m_partition;
 
     if (!partition.IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened"};
@@ -33,7 +36,7 @@ void NtfsChecker::PrintBootRecord(std::ostream &output)
 // done
 void NtfsChecker::PrintMft(std::ostream &output, bool printAll)
 {
-    Partition &partition = ntfs.m_partition;
+    Partition &partition = m_ntfs.m_partition;
 
     if (!partition.IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened"};
@@ -76,7 +79,7 @@ void NtfsChecker::PrintMft(std::ostream &output, bool printAll)
 // done
 void NtfsChecker::PrintBitmap(std::ostream &output)
 {
-    Partition &partition = ntfs.m_partition;
+    Partition &partition = m_ntfs.m_partition;
 
     if (!partition.IsOpened()) {
         throw PartitionFileNotOpenedException{"partition file is not opened"};
@@ -100,4 +103,68 @@ void NtfsChecker::PrintBitmap(std::ostream &output)
     }
 
     output << Text::hline(61) << std::endl;
+}
+
+// done
+bool NtfsChecker::CheckBootRecord(std::ostream &output)
+{
+    boot_record bootRecord = m_ntfs.m_partition.GetBootRecord();
+
+    // ---- check partition size ----
+
+    auto &file = m_ntfs.m_partition.m_file;
+
+    // compute the partition file size
+    file.seekg(0, std::ios::beg);
+    file.ignore(std::numeric_limits<std::streamsize>::max());
+    std::streamsize size = file.gcount();
+    file.clear();
+    file.seekg(0, std::ios_base::beg);
+
+    if (size != bootRecord.partition_size) {
+        output <<
+            "WARNING: the size stated in the boot record doesn't correspond with the actual partition size"
+            << std::endl;
+        return false;
+    }
+
+    // ---- check mft size to fit mft items ----
+    int32_t mftSize = bootRecord.bitmap_start_address - bootRecord.mft_start_address;
+    if (mftSize % sizeof(mft_item) != 0) {
+        output <<
+               "WARNING: the mft size isn't divisible by the mft item size"
+               << std::endl;
+        return false;
+    }
+
+
+    // ---- check cluster size and cluster count against the data segment size and bitmap ----
+    int32_t bitmapSize = bootRecord.data_start_address - bootRecord.bitmap_start_address;
+    int32_t dataSegmentSize = bootRecord.partition_size - bootRecord.data_start_address;
+
+    auto expectedBytes = static_cast<int32_t>(std::ceil(bootRecord.cluster_count / 8.0));
+    if (expectedBytes != bitmapSize) {
+        output <<
+               "WARNING: the bitmap size doesn't correspond with the cluster count"
+               << std::endl;
+        return false;
+    }
+
+    auto expectedSize = bootRecord.cluster_count * bootRecord.cluster_size;
+    if (expectedSize != dataSegmentSize) {
+        output <<
+               "WARNING: the data segment size doesn't correspond with the cluster count"
+               << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+// done
+bool NtfsChecker::CheckNodeSizes(std::ostream &output)
+{
+    NodeSizeChecker checker{m_ntfs, output};
+
+    return checker.Run(4);
 }

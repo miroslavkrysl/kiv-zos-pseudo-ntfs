@@ -37,9 +37,39 @@ public:
      */
     void PrintBitmap(std::ostream &output);
 
+    void CheckConsistency(std::ostream &output);
+
+    /**
+     * Check the boot record values.
+     * Checks the partition size against the actual size,
+     * if the mft items fits into the mft size and
+     * if the cluster size and cluster count correspond
+     * with the data segment size and bitmap size.
+     *
+     * @param output The output to print messages.
+     *
+     * @return True if everything is OK, false otherwise.
+     */
+    bool CheckBootRecord(std::ostream &output);
+
+    /**
+     * Check every node if its size corresponds
+     * with the number of clusters assigned to it.
+     *
+     * @param output The output to print messages.
+     *
+     * @return True if everything is OK, false otherwise.
+     */
+    bool CheckNodeSizes(std::ostream &output);
+
+    bool CheckFileDirectories(std::ostream &output);
+
 private:
 
-    Ntfs &ntfs;
+    /**
+     * The ntfs which the ntfs checker operates on.
+     */
+    Ntfs &m_ntfs;
 };
 
 

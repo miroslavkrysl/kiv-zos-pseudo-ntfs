@@ -10,6 +10,7 @@
 class Ntfs
 {
     friend class NtfsChecker;
+    friend class NodeSizeChecker;
 public:
     /**
      * Initializes a ntfs bound to the partition file on the given path.

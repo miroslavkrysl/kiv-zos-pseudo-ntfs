@@ -323,6 +323,7 @@ void Shell::CmdIncp(std::vector<std::string> arguments)
     }
 
     // compute the file size
+    inFile.seekg(0, std::ios::beg);
     inFile.ignore(std::numeric_limits<std::streamsize>::max());
     std::streamsize size = inFile.gcount();
     inFile.clear();
@@ -457,4 +458,18 @@ void Shell::CmdBitmap(std::vector<std::string> arguments)
     }
 
     m_ntfsChecker.PrintBitmap(m_output);
+}
+
+// done
+void Shell::CmdCheck(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 1) {
+        throw ShellWrongArgumentsException("check takes no arguments");
+    }
+
+    bool result = m_ntfsChecker.CheckNodeSizes(m_output);
+
+    if (result) {
+        m_output << "OK" << std::endl;
+    }
 }
