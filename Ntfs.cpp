@@ -1,11 +1,6 @@
 #include <utility>
-
-#include <utility>
-
-#include <utility>
 #include <algorithm>
 #include <sstream>
-#include <iostream>
 
 #include "Ntfs.h"
 #include "Exceptions/NtfsExceptions.h"
@@ -307,8 +302,12 @@ void Ntfs::Mv(std::string sourcePath, std::string destinationPath)
 
         m_nodeManager.RenameNode(src, destName);
 
-        AddIntoDirectory(dest, src);
+        if (dest.GetUid() == parent.GetUid()) {
+            return;
+        }
+
         RemoveFromDirectory(parent, src);
+        AddIntoDirectory(dest, src);
     }
     catch (NtfsNodeNotFoundException &exception) {
         throw NtfsPathNotFoundException{"destination directory not found"};
@@ -320,6 +319,7 @@ void Ntfs::Mv(std::string sourcePath, std::string destinationPath)
     }
     catch (NodeManagerException &exception) {
         // resources allocation failed
+        AddIntoDirectory(parent, src);
         m_nodeManager.RenameNode(src, srcName);
         throw;
     }

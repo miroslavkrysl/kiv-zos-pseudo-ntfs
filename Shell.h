@@ -40,7 +40,7 @@ private:
      */
     std::unordered_map<std::string, Command> m_actions{
         {"exit", &Shell::CmdExit},
-//        {"load", &Shell::CmdLoad},
+        {"load", &Shell::CmdLoad},
         {"opened", &Shell::CmdOpened},
         {"format", &Shell::CmdFormat},
         {"pwd", &Shell::CmdPwd},
@@ -53,8 +53,8 @@ private:
         {"incp", &Shell::CmdIncp},
         {"outcp", &Shell::CmdOutcp},
         {"rm", &Shell::CmdRm},
-//        {"mv", &Shell::CmdMv},
-//        {"cp", &Shell::CmdCp},
+        {"mv", &Shell::CmdMv},
+        {"cp", &Shell::CmdCp},
         {"bootrecord", &Shell::CmdBootrecord},
         {"mft", &Shell::CmdMft},
         {"bitmap", &Shell::CmdBitmap},
@@ -108,6 +108,13 @@ private:
      * @param arguments Only the command name.
      */
     void CmdExit(std::vector<std::string> arguments);
+
+    /**
+     * Load the file with ntfs shell commands and process them.
+     *
+     * @param arguments The command name and the commands file path.
+     */
+    void CmdLoad(std::vector<std::string> arguments);
 
     /**
      * Check whether the ntfs partition is formatted.
@@ -193,7 +200,19 @@ private:
      */
     void CmdRm(std::vector<std::string> arguments);
 
+    /**
+     * Move the file or the directory to the new destination and optionally rename it.
+     *
+     * @param arguments The command name, the source node path and the destination node path.
+     */
+    void CmdMv(std::vector<std::string> arguments);
 
+    /**
+     * Copy the file to the new destination and optionally rename it.
+     *
+     * @param arguments The command name, the source file path and the destination file path.
+     */
+    void CmdCp(std::vector<std::string> arguments);
 
     /**
      * Print the boot record values.

@@ -172,16 +172,21 @@ void Shell::CmdInfo(std::vector<std::string> arguments)
         m_output << "Type: " << (node.IsDirectory() ? "D" : "F") << std::endl;
         m_output << "Size: " << node.GetSize() << " B" << std::endl;
 
-        m_output << "Fragments: " << std::endl;
+        auto fragments = node.GetFragments();
 
-        for (auto &fragment : node.GetFragments()) {
+        m_output << "Fragments: (" << fragments.size() << ")" << std::endl;
+
+        for (auto &fragment : fragments) {
             m_output << "    [start=" << fragment.start << ", count=" << fragment.count << "]" << std::endl;
         }
 
-        m_output << "Clusters: ";
+        auto clusters = node.GetClusters();
+
+        m_output << "Clusters: (" << clusters.size() << ")" << std::endl;
+        m_output << "    ";
 
         bool first = true;
-        for (auto &cluster : node.GetClusters()) {
+        for (auto &cluster : clusters) {
             if (!first) {
                 m_output << ", ";
             } else {
@@ -356,8 +361,49 @@ void Shell::CmdRm(std::vector<std::string> arguments)
     }
 }
 
+// done
+void Shell::CmdMv(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 3) {
+        throw ShellWrongArgumentsException("mv takes exactly two arguments");
+    }
 
+    try {
+        m_ntfs.Mv(arguments[1], arguments[2]);
+        m_output << "OK" << std::endl;
+    }
+    catch (NtfsFileNotFoundException &exception) {
+        m_output << "FILE NOT FOUND" << std::endl;
+    }
+    catch (NtfsPathNotFoundException &exception) {
+        m_output << "PATH NOT FOUND" << std::endl;
+    }
+    catch (NtfsNodeAlreadyExistsException &exception) {
+        m_output << "EXISTS" << std::endl;
+    }
+}
 
+// done
+void Shell::CmdCp(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 3) {
+        throw ShellWrongArgumentsException("cp takes exactly two arguments");
+    }
+
+    try {
+        m_ntfs.Cpfile(arguments[1], arguments[2]);
+        m_output << "OK" << std::endl;
+    }
+    catch (NtfsFileNotFoundException &exception) {
+        m_output << "FILE NOT FOUND" << std::endl;
+    }
+    catch (NtfsPathNotFoundException &exception) {
+        m_output << "PATH NOT FOUND" << std::endl;
+    }
+    catch (NtfsNodeAlreadyExistsException &exception) {
+        m_output << "EXISTS" << std::endl;
+    }
+}
 
 // done
 void Shell::CmdBootrecord(std::vector<std::string> arguments)
