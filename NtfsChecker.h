@@ -37,8 +37,6 @@ public:
      */
     void PrintBitmap(std::ostream &output);
 
-    void CheckConsistency(std::ostream &output);
-
     /**
      * Check the boot record values.
      * Checks the partition size against the actual size,
@@ -62,6 +60,14 @@ public:
      */
     bool CheckNodeSizes(std::ostream &output);
 
+    /**
+     * Check every node if it is present in exactly
+     * one directory reachable from the directory tree.
+     *
+     * @param output The output to print messages.
+     *
+     * @return True if everything is OK, false otherwise.
+     */
     bool CheckFileDirectories(std::ostream &output);
 
 private:

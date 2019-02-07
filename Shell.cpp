@@ -467,9 +467,13 @@ void Shell::CmdCheck(std::vector<std::string> arguments)
         throw ShellWrongArgumentsException("check takes no arguments");
     }
 
-    bool result = m_ntfsChecker.CheckNodeSizes(m_output);
+    if (!m_ntfsChecker.CheckBootRecord(m_output)
+        || !m_ntfsChecker.CheckNodeSizes(m_output)
+        || !m_ntfsChecker.CheckFileDirectories(m_output)) {
 
-    if (result) {
-        m_output << "OK" << std::endl;
+        m_output << "FAILED" << std::endl;
+        return;
     }
+
+    m_output << "OK" << std::endl;
 }

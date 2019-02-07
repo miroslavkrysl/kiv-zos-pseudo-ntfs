@@ -1,14 +1,14 @@
 #pragma once
 
 #include <mutex>
-#include <set>
+#include <unordered_set>
 #include <atomic>
 #include <memory>
 
 #include "Ntfs.h"
 
 /**
- * The class FileSizeChecker contains a logic for the ntfs nodes sizes check.
+ * The class NodeSizeChecker contains a logic for the ntfs nodes sizes check.
  */
 class NodeSizeChecker
 {
@@ -74,7 +74,7 @@ private:
     /**
      * The set of uids of already checked nodes.
      */
-    std::set<int32_t> m_checkedNodes;
+    std::unordered_set<int32_t> m_checkedNodes;
 
     /**
      * Get the next node to process;

@@ -11,6 +11,7 @@ class Ntfs
 {
     friend class NtfsChecker;
     friend class NodeSizeChecker;
+    friend class DirectoryTreeChecker;
 public:
     /**
      * Initializes a ntfs bound to the partition file on the given path.

@@ -4,6 +4,7 @@
 #include "Text.h"
 #include "Exceptions/PartitionExceptions.h"
 #include "NodeSizeChecker.h"
+#include "DirectoryTreeChecker.h"
 
 // done
 NtfsChecker::NtfsChecker(Ntfs &ntfs)
@@ -167,4 +168,12 @@ bool NtfsChecker::CheckNodeSizes(std::ostream &output)
     NodeSizeChecker checker{m_ntfs, output};
 
     return checker.Run(4);
+}
+
+// done
+bool NtfsChecker::CheckFileDirectories(std::ostream &output)
+{
+    DirectoryTreeChecker checker{m_ntfs, output};
+
+    return checker.Run();
 }
