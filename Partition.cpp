@@ -74,7 +74,7 @@ void Partition::Format(int32_t size, std::string signature, std::string descript
     int32_t mftItemCount = ComputeMftItemCount(size);
     int32_t mftSize = mftItemCount * sizeof(mft_item);
 
-    int32_t clusterCount = ComputeClusterCount(size - mftSize);
+    int32_t clusterCount = ComputeClusterCount(size - mftSize - sizeof(boot_record));
     int32_t dataSegmentSize = clusterCount * CLUSTER_SIZE;
     auto bitmapSize = static_cast<int32_t>(std::ceil(clusterCount / 8.0));
 
