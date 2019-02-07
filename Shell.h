@@ -61,6 +61,7 @@ private:
         {"mft", &Shell::CmdMft},
         {"bitmap", &Shell::CmdBitmap},
         {"check", &Shell::CmdCheck},
+        {"break", &Shell::CmdBreak},
     };
 
     /**
@@ -244,4 +245,12 @@ private:
      * @param arguments Only the command name.
      */
     void CmdCheck(std::vector<std::string> arguments);
+
+    /**
+     * Simulate the partition inconsistency by adding
+     * some inconsistent files.
+     *
+     * @param arguments Only the command name.
+     */
+    void CmdBreak(std::vector<std::string> arguments);
 };

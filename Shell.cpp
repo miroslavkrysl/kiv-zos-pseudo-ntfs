@@ -477,3 +477,15 @@ void Shell::CmdCheck(std::vector<std::string> arguments)
 
     m_output << "OK" << std::endl;
 }
+
+// done
+void Shell::CmdBreak(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 1) {
+        throw ShellWrongArgumentsException("break takes no arguments");
+    }
+
+    m_ntfsChecker.AddInconsistency();
+
+    m_output << "OK" << std::endl;
+}

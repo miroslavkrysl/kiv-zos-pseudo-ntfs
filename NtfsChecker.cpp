@@ -177,3 +177,20 @@ bool NtfsChecker::CheckFileDirectories(std::ostream &output)
 
     return checker.Run();
 }
+
+// done
+void NtfsChecker::AddInconsistency()
+{
+    Node node1 = m_ntfs.m_nodeManager.CreateNode("outdir", false, 200);
+
+    Node node2 = m_ntfs.m_nodeManager.CreateNode("sizediff", false, 3000);
+
+    m_ntfs.m_nodeManager.SetupMftItems(
+        node2.m_mftItems,
+        node2.GetUid(),
+        node2.GetName(),
+        node2.IsDirectory(),
+        200,
+        node2.GetFragments());
+    m_ntfs.m_nodeManager.SaveNode(node2);
+}

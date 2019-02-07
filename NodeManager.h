@@ -12,6 +12,7 @@
  */
 class NodeManager
 {
+    friend class NtfsChecker;
 public:
     /**
      * Initializes a new NodeManager, that will opperate on the given partition.

@@ -70,6 +70,12 @@ public:
      */
     bool CheckFileDirectories(std::ostream &output);
 
+    /**
+     * Add a file that isn't in any directory and a file
+     * that has different number of clusters than it needs.
+     */
+    void AddInconsistency();
+
 private:
 
     /**

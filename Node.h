@@ -15,11 +15,8 @@
  */
 class Node
 {
-    /**
-     * Only the NodeManager can create a node.
-     */
     friend class NodeManager;
-
+    friend class NtfsChecker;
 public:
     /**
      * Defaulted empty Node constructor
