@@ -131,7 +131,7 @@ void Partition::Format(int32_t size, std::string signature, std::string descript
     rootMftItem.item.size = sizeof(int32_t);
     rootMftItem.item.order = 0;
     rootMftItem.item.count = 1;
-    std::strncpy(rootMftItem.item.name, "root", sizeof(mft_item::name) - 1);
+    std::strncpy(rootMftItem.item.name, "/", sizeof(mft_item::name) - 1);
     rootMftItem.item.name[sizeof(mft_item::name) - 1] = '\0';
 
     rootMftItem.item.fragments[0].start = 0;

@@ -42,10 +42,10 @@ private:
 //        {"load", &Shell::load_},
         {"opened", &Shell::CmdOpened},
 //        {"format", &Shell::formatCmd},
-//        {"pwd", &Shell::pwd_},
-//        {"cd", &Shell::CmdCd},
+        {"pwd", &Shell::CmdPwd},
+        {"cd", &Shell::CmdCd},
 //        {"info", &Shell::info_},
-//        {"ls", &Shell::lsCmd},
+        {"ls", &Shell::CmdLs},
 //        {"cat", &Shell::cat_},
 //        {"mkdir", &Shell::MkdirCmd},
 //        {"rmdir", &Shell::rmdir_},
@@ -95,14 +95,35 @@ private:
     /**
      * Stop the shell.
      *
-     * @param arguments
+     * @param arguments Only the command name.
      */
     void CmdExit(std::vector<std::string> arguments);
 
     /**
      * Check whether the ntfs partition is formatted.
      *
-     * @param arguments
+     * @param arguments Only the command name.
      */
     void CmdOpened(std::vector<std::string> arguments);
+
+    /**
+     * Print the current working directory path.
+     *
+     * @param arguments Only the command name.
+     */
+    void CmdPwd(std::vector<std::string> arguments);
+
+    /**
+     * Change the current working directory.
+     *
+     * @param arguments The command name and the directory path.
+     */
+    void CmdCd(std::vector<std::string> arguments);
+
+    /**
+     * Print the directory contents.
+     *
+     * @param arguments The command name and the directory path.
+     */
+    void CmdLs(std::vector<std::string> arguments);
 };

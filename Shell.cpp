@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include "Shell.h"
+#include "Exceptions/ShellExceptions.h"
+#include "Exceptions/NtfsExceptions.h"
 
 // done
 Shell::Shell(Ntfs &ntfs)
@@ -42,23 +44,96 @@ void Shell::Handle(std::string line)
 
     if (Shell::m_actions.find(commandName) == Shell::m_actions.end()) {
         m_output << "UNKNOWN COMMAND" << std::endl;
+        return;
     }
 
     Command command = Shell::m_actions[commandName];
 
-    (this->*command)(arguments);
+    try {
+        (this->*command)(arguments);
+    }
+    catch (AppException &exception) {
+        m_output << "ERROR: " << exception.what() << std::endl;
+    }
 }
 
 // done
 void Shell::CmdExit(std::vector<std::string> arguments)
 {
+    if (arguments.size() != 1) {
+        throw ShellWrongArgumentsException("exit takes no arguments");
+    }
+
     m_shouldTerminate = true;
 }
 
 // done
 void Shell::CmdOpened(std::vector<std::string> arguments)
 {
+    if (arguments.size() != 1) {
+        throw ShellWrongArgumentsException("opened takes no arguments");
+    }
+
     m_output << (m_ntfs.IsOpened() ? "YES" : "NO") << std::endl;
+}
+
+// done
+void Shell::CmdPwd(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 1) {
+        throw ShellWrongArgumentsException("pwd takes no arguments");
+    }
+    m_output << m_ntfs.Pwd() << std::endl;
+}
+
+//done
+void Shell::CmdCd(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 2) {
+        throw ShellWrongArgumentsException("cd takes exactly one argument");
+    }
+
+    try {
+        m_ntfs.Cd(arguments[1]);
+    }
+    catch (NtfsPathNotFoundException &exception) {
+        m_output << "PATH NOT FOUND" << std::endl;
+    }
+}
+
+// done
+void Shell::CmdLs(std::vector<std::string> arguments)
+{
+    if (arguments.size() > 2) {
+        throw ShellWrongArgumentsException("ls takes one argument or no arguments");
+    }
+
+    std::string path = ".";
+
+    if (arguments.size() == 2) {
+        path = arguments[1];
+    }
+
+    try {
+        auto items = m_ntfs.Ls(path);
+
+        // skip parent node
+        items.pop_front();
+
+        for (auto &item : items) {
+
+            if (item.IsDirectory()) {
+                m_output << "+";
+            } else {
+                m_output << "-";
+            }
+
+            m_output << item.GetName() << std::endl;
+        }
+    }
+    catch (NtfsPathNotFoundException &exception) {
+        m_output << "PATH NOT FOUND" << std::endl;
+    }
 }
 
 //void Shell::formatCmd(std::vector<std::string> arguments)
