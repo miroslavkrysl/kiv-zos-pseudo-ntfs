@@ -230,6 +230,61 @@ void Shell::CmdRmdir(std::vector<std::string> arguments)
     }
 }
 
+// done
+void Shell::CmdIncp(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 3) {
+        throw ShellWrongArgumentsException("incp takes exactly two arguments");
+    }
+
+    std::ifstream inFile{arguments[1]};
+
+    if (!inFile.is_open()) {
+        m_output << "FILE NOT FOUND" << std::endl;
+        return;
+    }
+
+    // compute the file size
+    inFile.ignore(std::numeric_limits<std::streamsize>::max());
+    std::streamsize size = inFile.gcount();
+    inFile.clear();
+    inFile.seekg(0, std::ios_base::beg);
+
+    try {
+        m_ntfs.Mkfile(arguments[2], inFile, size);
+        m_output << "OK" << std::endl;
+    }
+    catch (NtfsPathNotFoundException &exception) {
+        m_output << "PATH NOT FOUND" << std::endl;
+    }
+    catch (NtfsNodeAlreadyExistsException &exception) {
+        m_output << "EXISTS" << std::endl;
+    }
+}
+
+// done
+void Shell::CmdOutcp(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 3) {
+        throw ShellWrongArgumentsException("outcp takes exactly two arguments");
+    }
+
+    std::ofstream outFile{arguments[2]};
+
+    if (!outFile.is_open()) {
+        m_output << "PATH NOT FOUND" << std::endl;
+        return;
+    }
+
+    try {
+        m_ntfs.Cat(arguments[1], outFile);
+        m_output << "OK" << std::endl;
+    }
+    catch (NtfsFileNotFoundException &exception) {
+        m_output << "FILE NOT FOUND" << std::endl;
+    }
+}
+
 
 
 

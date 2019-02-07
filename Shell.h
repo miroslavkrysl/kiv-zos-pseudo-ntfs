@@ -50,8 +50,8 @@ private:
         {"cat", &Shell::CmdCat},
         {"mkdir", &Shell::CmdMkdir},
         {"rmdir", &Shell::CmdRmdir},
-//        {"incp", &Shell::CmdIncp},
-//        {"outcp", &Shell::CmdOutcp},
+        {"incp", &Shell::CmdIncp},
+        {"outcp", &Shell::CmdOutcp},
 //        {"mv", &Shell::CmdMv},
 //        {"cp", &Shell::CmdCp},
         {"bootrecord", &Shell::CmdBootrecord},
@@ -163,6 +163,20 @@ private:
      * @param arguments The command name and the directory path.
      */
     void CmdRmdir(std::vector<std::string> arguments);
+
+    /**
+     * Copy the file from outside into the partition.
+     *
+     * @param arguments The command name, the source file path and the destination file path.
+     */
+    void CmdIncp(std::vector<std::string> arguments);
+
+    /**
+     * Copy the file outside from the partition.
+     *
+     * @param arguments The command name, the source file path and the destination file path.
+     */
+    void CmdOutcp(std::vector<std::string> arguments);
 
 
 
