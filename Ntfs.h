@@ -27,8 +27,9 @@ public:
 
     /**
      * Get the current working directory.
+     * @return The current working directory path.
      */
-    Node Pwd();
+    std::string Pwd();
 
     /**
      * Change the current working directory.

@@ -22,11 +22,28 @@ bool Ntfs::IsOpened()
     return m_partition.IsOpened();
 }
 
-
 // done
-Node Ntfs::Pwd()
+std::string Ntfs::Pwd()
 {
-    return m_currentDirectory;
+    std::list<std::string> pathNodes;
+    Node dir = m_currentDirectory;
+
+    while (dir.GetUid() != UID_ROOT) {
+        pathNodes.emplace_front(dir.GetName());
+
+        auto items = GetDirectoryContents(dir);
+
+        dir = items.front();
+    }
+
+    std::string path{"/"};
+
+    for (auto &node : pathNodes) {
+        path += node;
+        path += "/";
+    }
+
+    return path;
 }
 
 // done
