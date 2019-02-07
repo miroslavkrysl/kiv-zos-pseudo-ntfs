@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "Ntfs.h"
+#include "NtfsChecker.h"
 
 /**
  * Simple shell to control the ntfs.
@@ -39,20 +40,23 @@ private:
      */
     std::unordered_map<std::string, Command> m_actions{
         {"exit", &Shell::CmdExit},
-//        {"load", &Shell::load_},
+//        {"load", &Shell::CmdLoad},
         {"opened", &Shell::CmdOpened},
-//        {"format", &Shell::formatCmd},
+//        {"format", &Shell::CmdFormat},
         {"pwd", &Shell::CmdPwd},
         {"cd", &Shell::CmdCd},
         {"info", &Shell::CmdInfo},
         {"ls", &Shell::CmdLs},
-//        {"cat", &Shell::cat_},
-//        {"mkdir", &Shell::MkdirCmd},
-//        {"rmdir", &Shell::rmdir_},
-//        {"incp", &Shell::incp_},
-//        {"outcp", &Shell::outcp_},
-//        {"mv", &Shell::mv_},
-//        {"cp", &Shell::cp_},
+//        {"cat", &Shell::CmdMkdir},
+//        {"mkdir", &Shell::CmdMkdir},
+//        {"rmdir", &Shell::CmdRmdir},
+//        {"incp", &Shell::CmdIncp},
+//        {"outcp", &Shell::CmdOutcp},
+//        {"mv", &Shell::CmdMv},
+//        {"cp", &Shell::CmdCp},
+        {"bootrecord", &Shell::CmdBootrecord},
+        {"mft", &Shell::CmdMft},
+        {"bitmap", &Shell::CmdBitmap},
     };
 
     /**
@@ -79,6 +83,11 @@ private:
      * The ntfs which the shell operates on.
      */
     Ntfs &m_ntfs;
+
+    /**
+     * The ntfs checker.
+     */
+    NtfsChecker m_ntfsChecker;
 
     /**
      * The shell termination condition.
@@ -130,7 +139,31 @@ private:
     /**
      * Print the directory contents.
      *
-     * @param arguments The command name and the directory path.
+     * @param arguments The command name and optionally the directory path.
      */
     void CmdLs(std::vector<std::string> arguments);
+
+
+
+    /**
+     * Print the boot record values.
+     *
+     * @param arguments Only the command name.
+     */
+    void CmdBootrecord(std::vector<std::string> arguments);
+
+    /**
+     * Print the mft.
+     *
+     * @param arguments The command name and optionally the `all` switch.
+     */
+    void CmdMft(std::vector<std::string> arguments);
+
+    /**
+     * Print the bitmap.
+     *
+     * @param arguments Only the command name.
+     */
+    void CmdBitmap(std::vector<std::string> arguments);
+
 };

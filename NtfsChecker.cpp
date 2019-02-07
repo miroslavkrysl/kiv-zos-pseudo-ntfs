@@ -1,13 +1,20 @@
 #include "NtfsChecker.h"
 #include "Text.h"
+#include "Exceptions/PartitionExceptions.h"
 
+// done
 NtfsChecker::NtfsChecker(Ntfs &ntfs)
     : ntfs(ntfs)
 {}
 
+// done
 void NtfsChecker::PrintBootRecord(std::ostream &output)
 {
     Partition &partition = ntfs.m_partition;
+
+    if (!partition.IsOpened()) {
+        throw PartitionFileNotOpenedException{"partition file is not opened"};
+    }
 
     output << Text::hline(61) << std::endl;
     output << "           Signature: " << partition.GetSignature() << std::endl;
@@ -23,9 +30,14 @@ void NtfsChecker::PrintBootRecord(std::ostream &output)
     output << Text::hline(61) << std::endl;
 }
 
-void NtfsChecker::PrintMft(std::ostream &output)
+// done
+void NtfsChecker::PrintMft(std::ostream &output, bool printAll)
 {
     Partition &partition = ntfs.m_partition;
+
+    if (!partition.IsOpened()) {
+        throw PartitionFileNotOpenedException{"partition file is not opened"};
+    }
 
     output << Text::hline(61) << std::endl;
 
@@ -44,6 +56,10 @@ void NtfsChecker::PrintMft(std::ostream &output)
         MftItem mftItem = partition.ReadMftItem(i);
         mft_item &item = mftItem.item;
 
+        if (!printAll && item.uid == UID_ITEM_FREE) {
+            continue;
+        }
+
         output
             << Text::justifyR(std::to_string(i), 10) << "|"
             << Text::justifyR(std::to_string(item.uid), 10) << "|"
@@ -57,9 +73,14 @@ void NtfsChecker::PrintMft(std::ostream &output)
     }
 }
 
+// done
 void NtfsChecker::PrintBitmap(std::ostream &output)
 {
     Partition &partition = ntfs.m_partition;
+
+    if (!partition.IsOpened()) {
+        throw PartitionFileNotOpenedException{"partition file is not opened"};
+    }
 
     output << Text::hline(61) << std::endl;
 

@@ -17,18 +17,22 @@ public:
 
     /**
      * Print the boot record to the given output stream.
+     *
      * @param output The output stream.
      */
     void PrintBootRecord(std::ostream &output);
 
     /**
      * Print the mft to the given output stream.
+     *
      * @param output The output stream.
+     * @param printAll If true, prints the free mft items too.
      */
-    void PrintMft(std::ostream &output);
+    void PrintMft(std::ostream &output, bool printAll);
 
     /**
      * Print the bitmap to the given output stream.
+     *
      * @param output The output stream.
      */
     void PrintBitmap(std::ostream &output);

@@ -8,7 +8,8 @@
 Shell::Shell(Ntfs &ntfs)
     : m_input(std::cin),
       m_output(std::cout),
-      m_ntfs(ntfs)
+      m_ntfs(ntfs),
+      m_ntfsChecker(m_ntfs)
 {}
 
 // done
@@ -173,6 +174,45 @@ void Shell::CmdLs(std::vector<std::string> arguments)
     catch (NtfsPathNotFoundException &exception) {
         m_output << "PATH NOT FOUND" << std::endl;
     }
+}
+
+
+
+
+// done
+void Shell::CmdBootrecord(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 1) {
+        throw ShellWrongArgumentsException("bootrecord takes no arguments");
+    }
+
+    m_ntfsChecker.PrintBootRecord(m_output);
+}
+
+// done
+void Shell::CmdMft(std::vector<std::string> arguments)
+{
+    if (arguments.size() > 2) {
+        throw ShellWrongArgumentsException("mft takes no arguments or the `all` switch");
+    }
+
+    bool printAll{false};
+
+    if (arguments.size() == 2 && arguments[1] == "all") {
+        printAll = true;
+    }
+
+    m_ntfsChecker.PrintMft(m_output, printAll);
+}
+
+// done
+void Shell::CmdBitmap(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 1) {
+        throw ShellWrongArgumentsException("bitmap takes no arguments");
+    }
+
+    m_ntfsChecker.PrintBitmap(m_output);
 }
 
 //void Shell::formatCmd(std::vector<std::string> arguments)
