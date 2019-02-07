@@ -44,7 +44,7 @@ private:
 //        {"format", &Shell::formatCmd},
         {"pwd", &Shell::CmdPwd},
         {"cd", &Shell::CmdCd},
-//        {"info", &Shell::info_},
+        {"info", &Shell::CmdInfo},
         {"ls", &Shell::CmdLs},
 //        {"cat", &Shell::cat_},
 //        {"mkdir", &Shell::MkdirCmd},
@@ -119,6 +119,13 @@ private:
      * @param arguments The command name and the directory path.
      */
     void CmdCd(std::vector<std::string> arguments);
+
+    /**
+     * Print info about the node.
+     *
+     * @param arguments The command name and the node path.
+     */
+    void CmdInfo(std::vector<std::string> arguments);
 
     /**
      * Print the directory contents.

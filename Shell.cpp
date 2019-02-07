@@ -102,6 +102,45 @@ void Shell::CmdCd(std::vector<std::string> arguments)
 }
 
 // done
+void Shell::CmdInfo(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 2) {
+        throw ShellWrongArgumentsException("info takes exactly one argument");
+    }
+
+    try {
+        Node node = m_ntfs.FindNode(arguments[1]);
+
+        m_output << "Name: " << node.GetName() << std::endl;
+        m_output << "Uid: " << node.GetUid() << std::endl;
+        m_output << "Type: " << (node.IsDirectory() ? "D" : "F") << std::endl;
+        m_output << "Size: " << node.GetSize() << " B" << std::endl;
+
+        m_output << "Fragments: " << std::endl;
+
+        for (auto &fragment : node.GetFragments()) {
+            m_output << "    [start=" << fragment.start << ", count=" << fragment.count << "]" << std::endl;
+        }
+
+        m_output << "Clusters: ";
+
+        bool first = true;
+        for (auto &cluster : node.GetClusters()) {
+            if (!first) {
+                m_output << ", ";
+            } else {
+                first = false;
+            }
+            m_output << cluster;
+        }
+        m_output << std::endl;
+    }
+    catch (NtfsNodeNotFoundException &exception) {
+        m_output << "FILE NOT FOUND" << std::endl;
+    }
+}
+
+// done
 void Shell::CmdLs(std::vector<std::string> arguments)
 {
     if (arguments.size() > 2) {
