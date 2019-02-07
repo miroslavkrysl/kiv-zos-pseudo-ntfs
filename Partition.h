@@ -32,6 +32,7 @@ public:
      * @param size The size of the partition.
      * @param signature The creators login name.
      * @param description The description of the partition.
+     *
      * @throws PartitionFileNotOpenedException If it fails to open the partition file.
      */
     void Format(int32_t size, std::string signature, std::string description);

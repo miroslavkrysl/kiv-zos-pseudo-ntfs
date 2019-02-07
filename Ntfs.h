@@ -132,6 +132,8 @@ public:
      * @param size The new size of the partition.
      * @param signature The signature of the partition.
      * @param description The partition description.
+     *
+     * @throws PartitionFileNotOpenedException If it fails to open the partition file.
      */
     void Format(int32_t size, std::string signature, std::string description);
 

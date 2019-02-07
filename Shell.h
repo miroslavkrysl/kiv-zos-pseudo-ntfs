@@ -42,7 +42,7 @@ private:
         {"exit", &Shell::CmdExit},
 //        {"load", &Shell::CmdLoad},
         {"opened", &Shell::CmdOpened},
-//        {"format", &Shell::CmdFormat},
+        {"format", &Shell::CmdFormat},
         {"pwd", &Shell::CmdPwd},
         {"cd", &Shell::CmdCd},
         {"info", &Shell::CmdInfo},
@@ -52,6 +52,7 @@ private:
         {"rmdir", &Shell::CmdRmdir},
         {"incp", &Shell::CmdIncp},
         {"outcp", &Shell::CmdOutcp},
+        {"rm", &Shell::CmdRm},
 //        {"mv", &Shell::CmdMv},
 //        {"cp", &Shell::CmdCp},
         {"bootrecord", &Shell::CmdBootrecord},
@@ -116,6 +117,13 @@ private:
     void CmdOpened(std::vector<std::string> arguments);
 
     /**
+     * Format the partition.
+     *
+     * @param arguments The command name, the size of the partition and optionally the partition description.
+     */
+    void CmdFormat(std::vector<std::string> arguments);
+
+    /**
      * Print the current working directory path.
      *
      * @param arguments Only the command name.
@@ -177,6 +185,13 @@ private:
      * @param arguments The command name, the source file path and the destination file path.
      */
     void CmdOutcp(std::vector<std::string> arguments);
+
+    /**
+     * Remove the file.
+     *
+     * @param arguments The command name and the file path.
+     */
+    void CmdRm(std::vector<std::string> arguments);
 
 
 
