@@ -121,6 +121,8 @@ public:
      *
      * @param path The file path - absolute or relative to the current working directory.
      * @param output The output stream.
+     *
+     * @throws NtfsFileNotFoundException When the file is not found.
      */
     void Cat(std::string path, std::ostream &output);
 

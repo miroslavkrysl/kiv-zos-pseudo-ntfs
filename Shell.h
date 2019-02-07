@@ -47,7 +47,7 @@ private:
         {"cd", &Shell::CmdCd},
         {"info", &Shell::CmdInfo},
         {"ls", &Shell::CmdLs},
-//        {"cat", &Shell::CmdMkdir},
+        {"cat", &Shell::CmdCat},
 //        {"mkdir", &Shell::CmdMkdir},
 //        {"rmdir", &Shell::CmdRmdir},
 //        {"incp", &Shell::CmdIncp},
@@ -142,6 +142,13 @@ private:
      * @param arguments The command name and optionally the directory path.
      */
     void CmdLs(std::vector<std::string> arguments);
+
+    /**
+     * Print the file contents.
+     *
+     * @param arguments The command name and the file path.
+     */
+    void CmdCat(std::vector<std::string> arguments);
 
 
 

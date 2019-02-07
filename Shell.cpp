@@ -176,6 +176,23 @@ void Shell::CmdLs(std::vector<std::string> arguments)
     }
 }
 
+// done
+void Shell::CmdCat(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 2) {
+        throw ShellWrongArgumentsException("cat takes exactly one argument");
+    }
+
+    try {
+        m_ntfs.Cat(arguments[1], m_output);
+        m_output << std::endl;
+    }
+    catch (NtfsFileNotFoundException &exception) {
+        m_output << "FILE NOT FOUND" << std::endl;
+    }
+}
+
+
 
 
 

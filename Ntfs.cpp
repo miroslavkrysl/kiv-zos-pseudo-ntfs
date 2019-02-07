@@ -399,7 +399,7 @@ void Ntfs::Cat(std::string path, std::ostream &output)
     auto parsedPath = ParsePath(std::move(path));
 
     if (parsedPath.second.back() == "/") {
-        throw NtfsPathNotFoundException{"file not found"};
+        throw NtfsFileNotFoundException{"file not found"};
     }
 
     try {
@@ -407,13 +407,13 @@ void Ntfs::Cat(std::string path, std::ostream &output)
         Node file = FindNode(parsedPath.first, parsedPath.second);
 
         if (file.IsDirectory()) {
-            throw NtfsPathNotFoundException{"file not found"};
+            throw NtfsFileNotFoundException{"file not found"};
         }
 
         m_nodeManager.ReadFromNode(file, output);
     }
     catch (NtfsNodeNotFoundException &exception) {
-        throw NtfsPathNotFoundException{"file not found"};
+        throw NtfsFileNotFoundException{"file not found"};
     }
 }
 
