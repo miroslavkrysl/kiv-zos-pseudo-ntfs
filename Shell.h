@@ -21,8 +21,10 @@ public:
      * Initializes a new Shell bound to the given ntfs.
      *
      * @param ntfs The ntfs which the shell will operate on.
+     * @param input The shell input stream.
+     * @param output The shell output stream.
      */
-    explicit Shell(Ntfs &ntfs);
+    explicit Shell(Ntfs &ntfs, std::istream &input, std::ostream &output);
 
     /**
      * Start reading the commands from input.

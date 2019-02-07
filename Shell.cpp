@@ -6,9 +6,9 @@
 #include "Exceptions/PartitionExceptions.h"
 
 // done
-Shell::Shell(Ntfs &ntfs)
-    : m_input(std::cin),
-      m_output(std::cout),
+Shell::Shell(Ntfs &ntfs, std::istream &input, std::ostream &output)
+    : m_input(input),
+      m_output(output),
       m_ntfs(ntfs),
       m_ntfsChecker(m_ntfs)
 {}
@@ -67,6 +67,24 @@ void Shell::CmdExit(std::vector<std::string> arguments)
     }
 
     m_shouldTerminate = true;
+}
+
+// done
+void Shell::CmdLoad(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 2) {
+        throw ShellWrongArgumentsException("load takes exactly one argument");
+    }
+
+    std::ifstream cmdFile{arguments[1]};
+
+    if (!cmdFile.is_open()) {
+        m_output << "FILE NOT FOUND" << std::endl;
+        return;
+    }
+
+    Shell subShell(m_ntfs, cmdFile, m_output);
+    subShell.Run();
 }
 
 // done
