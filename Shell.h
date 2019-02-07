@@ -48,8 +48,8 @@ private:
         {"info", &Shell::CmdInfo},
         {"ls", &Shell::CmdLs},
         {"cat", &Shell::CmdCat},
-//        {"mkdir", &Shell::CmdMkdir},
-//        {"rmdir", &Shell::CmdRmdir},
+        {"mkdir", &Shell::CmdMkdir},
+        {"rmdir", &Shell::CmdRmdir},
 //        {"incp", &Shell::CmdIncp},
 //        {"outcp", &Shell::CmdOutcp},
 //        {"mv", &Shell::CmdMv},
@@ -149,6 +149,20 @@ private:
      * @param arguments The command name and the file path.
      */
     void CmdCat(std::vector<std::string> arguments);
+
+    /**
+     * Make a new directory.
+     *
+     * @param arguments The command name and the directory path.
+     */
+    void CmdMkdir(std::vector<std::string> arguments);
+
+    /**
+     * Remove the directory.
+     *
+     * @param arguments The command name and the directory path.
+     */
+    void CmdRmdir(std::vector<std::string> arguments);
 
 
 

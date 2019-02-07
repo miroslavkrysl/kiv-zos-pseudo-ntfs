@@ -158,9 +158,9 @@ private:
     NodeManager m_nodeManager;
 
     /**
-     * The current working directory.
+     * The uid of the current working directory.
      */
-    Node m_currentDirectory;
+    int32_t m_currentDirectory;
 
     /**
      * Get the directory contents.
@@ -204,9 +204,9 @@ private:
      *
      * @param path The path to be parsed.
      *
-     * @return The pair - first is starting directory, second is the list of path nodes.
+     * @return The pair - first is the uid of starting directory, second is the list of path nodes.
      */
-    std::pair<Node, std::list<std::string>> ParsePath(std::string path);
+    std::pair<int32_t , std::list<std::string>> ParsePath(std::string path);
 
     /**
     * Find the node inside the partition directory tree
@@ -214,32 +214,13 @@ private:
     * The path node symbol `..` means jump one directory up,
     * `.` means do not jump anywhere.
     *
-    * @param directory The start directory node.
+    * @param directory The uid of start directory node.
     * @param path The node path.
     *
     * @throws NtfsNodeNotFoundException When the node is not found.
     *
     * @return The found node.
     */
-    Node FindNode(const Node &directory, const std::list<std::string> &path);
-
-    /**
-     * Found the root directory (the one with uid = 1).
-     *
-     * @throws NtfsNodeNotFoundException When the node is not found.
-     *
-     * @return The root directory node.
-     */
-    Node FindRoot();
-
-    /**
-     * Check whether the node of the given name is in the given directory.
-     *
-     * @param directory The directory to check.
-     * @param name The name of the node.
-     *
-     * @return True, if the node of the given name is present in the directory, false otherwise.
-     */
-    bool IsInDirectory(const Node &directory, std::string name);
+    Node FindNode(int32_t directory, const std::list<std::string> &path);
 };
 

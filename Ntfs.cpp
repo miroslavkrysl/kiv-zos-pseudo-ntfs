@@ -1,6 +1,8 @@
 #include <utility>
 
 #include <utility>
+
+#include <utility>
 #include <algorithm>
 #include <sstream>
 #include <iostream>
@@ -13,7 +15,7 @@
 Ntfs::Ntfs(std::string partitionPath)
     : m_partition{std::move(partitionPath)},
       m_nodeManager{m_partition},
-      m_currentDirectory{FindRoot()}
+      m_currentDirectory{UID_ROOT}
 {}
 
 // done
@@ -26,7 +28,7 @@ bool Ntfs::IsOpened()
 std::string Ntfs::Pwd()
 {
     std::list<std::string> pathNodes;
-    Node dir = m_currentDirectory;
+    Node dir = m_nodeManager.FindNode(m_currentDirectory);
 
     while (dir.GetUid() != UID_ROOT) {
         pathNodes.emplace_front(dir.GetName());
@@ -63,7 +65,7 @@ void Ntfs::Cd(std::string path)
             throw NtfsPathNotFoundException{"directory not found"};
         }
 
-        m_currentDirectory = directory;
+        m_currentDirectory = directory.GetUid();
     }
     catch (NtfsNodeNotFoundException &exception) {
         throw NtfsPathNotFoundException{"directory not found"};
@@ -93,7 +95,7 @@ std::list<Node> Ntfs::Ls(std::string path)
 // done
 void Ntfs::Mkdir(std::string path)
 {
-    auto parsedPath = ParsePath(path);
+    auto parsedPath = ParsePath(std::move(path));
 
     if (parsedPath.second.back() == "/") {
         parsedPath.second.pop_back();
@@ -154,7 +156,7 @@ void Ntfs::Rmdir(std::string path)
         Node parent = FindNode(parsedPath.first, parsedPath.second);
 
         // find the directory being removed itself
-        Node directory = FindNode(parent, std::list<std::string>{directoryName});
+        Node directory = FindNode(parent.GetUid(), std::list<std::string>{directoryName});
 
         if (!directory.IsDirectory()) {
             throw NtfsFileNotFoundException{"directory not found"};
@@ -235,7 +237,7 @@ void Ntfs::Rmfile(std::string path)
         Node parent = FindNode(parsedPath.first, parsedPath.second);
 
         // find the file being removed itself
-        Node file = FindNode(parent, std::list<std::string>{fileName});
+        Node file = FindNode(parent.GetUid(), std::list<std::string>{fileName});
 
         if (file.IsDirectory()) {
             throw NtfsFileNotFoundException{"file not found"};
@@ -273,7 +275,7 @@ void Ntfs::Mv(std::string sourcePath, std::string destinationPath)
         parent = FindNode(srcPath.first, srcPath.second);
 
         // find the src node itself
-        src = FindNode(parent, std::list<std::string>{srcName});
+        src = FindNode(parent.GetUid(), std::list<std::string>{srcName});
 
         if (srcIsDir && !src.IsDirectory()) {
             throw NtfsFileNotFoundException{"source file not found"};
@@ -531,13 +533,13 @@ void Ntfs::RemoveFromDirectory(Node &directory, const Node &node)
 }
 
 // done
-std::pair<Node, std::list<std::string>> Ntfs::ParsePath(std::string path)
+std::pair<int32_t, std::list<std::string>> Ntfs::ParsePath(std::string path)
 {
     std::list<std::string> pathNodes;
-    Node start;
+    int32_t start;
 
     if (path.front() == '/') {
-        start = FindRoot();
+        start = UID_ROOT;
         path.erase(0, 1);
     }
     else {
@@ -562,13 +564,13 @@ std::pair<Node, std::list<std::string>> Ntfs::ParsePath(std::string path)
         pathNodes.emplace_back("/");
     }
 
-    return {std::move(start), std::move(pathNodes)};
+    return {start, std::move(pathNodes)};
 }
 
 // done
-Node Ntfs::FindNode(const Node &directory, const std::list<std::string> &path)
+Node Ntfs::FindNode(int32_t directory, const std::list<std::string> &path)
 {
-    Node currentNode = directory;
+    Node currentNode = m_nodeManager.FindNode(directory);
 
     for (auto &pathNode : path) {
         if (pathNode == ".") {
@@ -608,33 +610,4 @@ Node Ntfs::FindNode(const Node &directory, const std::list<std::string> &path)
     }
 
     return currentNode;
-}
-
-// done
-Node Ntfs::FindRoot()
-{
-    try {
-        return m_nodeManager.FindNode(UID_ROOT);
-    }
-    catch (NodeManagerNodeNotFoundException &exception) {
-        throw NtfsRootNotFoundException{"can't find the partition root directory"};
-    }
-}
-
-// done
-bool Ntfs::IsInDirectory(const Node &directory, std::string name)
-{
-
-    auto items = GetDirectoryContents(directory);
-
-    // ignore parent dir
-    items.pop_front();
-
-    for (auto &item : items) {
-        if (item.GetName() == name) {
-            return true;
-        }
-    }
-
-    return false;
 }

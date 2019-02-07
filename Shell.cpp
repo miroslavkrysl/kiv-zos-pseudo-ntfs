@@ -192,6 +192,43 @@ void Shell::CmdCat(std::vector<std::string> arguments)
     }
 }
 
+// done
+void Shell::CmdMkdir(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 2) {
+        throw ShellWrongArgumentsException("mkdir takes exactly one argument");
+    }
+
+    try {
+        m_ntfs.Mkdir(arguments[1]);
+        m_output << "OK" << std::endl;
+    }
+    catch (NtfsFileNotFoundException &exception) {
+        m_output << "PATH NOT FOUND" << std::endl;
+    }
+    catch (NtfsNodeAlreadyExistsException &exception) {
+        m_output << "EXISTS" << std::endl;
+    }
+}
+
+// done
+void Shell::CmdRmdir(std::vector<std::string> arguments)
+{
+    if (arguments.size() != 2) {
+        throw ShellWrongArgumentsException("rmdir takes exactly one argument");
+    }
+
+    try {
+        m_ntfs.Rmdir(arguments[1]);
+        m_output << "OK" << std::endl;
+    }
+    catch (NtfsFileNotFoundException &exception) {
+        m_output << "PATH NOT FOUND" << std::endl;
+    }
+    catch (NtfsDirectoryNotEmptyException &exception) {
+        m_output << "NOT EMPTY" << std::endl;
+    }
+}
 
 
 
@@ -231,6 +268,7 @@ void Shell::CmdBitmap(std::vector<std::string> arguments)
 
     m_ntfsChecker.PrintBitmap(m_output);
 }
+
 
 //void Shell::formatCmd(std::vector<std::string> arguments)
 //{
